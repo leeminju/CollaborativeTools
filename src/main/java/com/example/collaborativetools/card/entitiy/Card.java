@@ -5,10 +5,7 @@ import com.example.collaborativetools.comment.entitiy.Comment;
 import com.example.collaborativetools.global.entity.Timestamped;
 import com.example.collaborativetools.usercard.entity.UserCard;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,11 +13,8 @@ import java.util.List;
 
 @Entity
 @Getter
-@Table(name = "cards")
-@EntityListeners(AuditingEntityListener.class)
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Card extends Timestamped {
 
+public class Card extends Timestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,23 +23,24 @@ public class Card extends Timestamped {
     private String title;
 
     @Column(nullable = false)
-    private String desc;
+    private String description;
+
+    @Column(name = "background_color",nullable = false)
+    private String backgroundColor;
 
     @Column(nullable = false)
-    private String background_color;
+    private Integer sequence;
 
-    private int order;
+    @Column(name = "due_date")
     private LocalDateTime dueDate;
-    private LocalDateTime createdAt;
-    private LocalDateTime modifiedAt;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "column_id", nullable = false)
     private Columns column;
 
-    @OneToMany(mappedBy = "comment")
+    @OneToMany(mappedBy = "card")
     private List<Comment> comments;
 
-    @OneToMany(mappedBy = "usercard")
+    @OneToMany(mappedBy = "card")
     private List<UserCard> userCardList;
 }

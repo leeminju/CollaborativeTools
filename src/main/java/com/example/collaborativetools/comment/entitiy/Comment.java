@@ -20,11 +20,11 @@ public class Comment extends Timestamped {
     private String content;
 
     @ManyToOne
-    @JoinColumn(name = "cards_id")
+    @JoinColumn(name = "card_id", nullable = false)
     private Card card;
 
     @ManyToOne
-    @JoinColumn(name = "users_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
 
