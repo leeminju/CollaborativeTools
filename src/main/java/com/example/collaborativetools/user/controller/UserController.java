@@ -49,10 +49,19 @@ public class UserController {
         return userDetails.getUser().getUsername();
     }
 
+    //비밀번호 변경
     @PutMapping("/users/password")
     public ResponseEntity<BaseResponse<String>> updatePassword(@RequestBody @Valid PasswordRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         userService.updatePassword(requestDto, userDetails.getUser());
         return ResponseEntity.ok()
                 .body(BaseResponse.of(UPDATE_PASSWORD, ""));
+    }
+
+    //회원 탈퇴
+    @DeleteMapping("/users")
+    public ResponseEntity<BaseResponse<String>> unregister(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.unregister( userDetails.getUser());
+        return ResponseEntity.ok()
+                .body(BaseResponse.of(UNREGISTER_USER, ""));
     }
 }

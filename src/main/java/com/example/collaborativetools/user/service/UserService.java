@@ -78,4 +78,13 @@ public class UserService {
 
         loginUser.updatePassword(newPassword);
     }
+
+    public void unregister(User user) {
+        User loginUser = userRepository.findById(user.getId()).orElseThrow(
+                () -> new ApiException(ErrorCode.NOT_FOUND_USER)
+        );
+        //연관관계 모두 끊어버리고 탈퇴해야함
+
+        userRepository.delete(loginUser);
+    }
 }

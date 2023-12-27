@@ -99,3 +99,19 @@ function updatePassword() {
         }
     );
 }
+
+//회원탈퇴
+function unRegister() {
+    $.ajax({
+            type: 'DELETE',
+            url: '/api/users',
+            success: function (response) {
+                alert(response['msg']);
+                logout();
+            },
+            error(error, status, request) {
+                alert(error['responseJSON']['msg']);
+            }
+        }
+    );
+}
