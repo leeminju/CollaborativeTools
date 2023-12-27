@@ -22,6 +22,7 @@ public enum ErrorCode {
 
     /* 404 NOT_FOUND : Resource 를 찾을 수 없음 */
     NOT_FOUND_USER(404, "존재하지 않는 사용자 입니다."),
+    NOT_FOUND_BOARD(404, "존재하지 않는 게시판 입니다."),
     /* 409 CONFLICT : Resource 중복 */
     IS_DUPLICATE_USERNAME(409, "중복된 username입니다."),
 
