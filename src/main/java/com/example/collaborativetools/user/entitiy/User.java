@@ -1,12 +1,13 @@
 package com.example.collaborativetools.user.entitiy;
 
-
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
-@Entity
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
 @Table(name = "users")
 public class User {
 
