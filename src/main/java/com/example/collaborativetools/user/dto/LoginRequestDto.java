@@ -1,14 +1,14 @@
 package com.example.collaborativetools.user.dto;
 
-import lombok.AllArgsConstructor;
+import com.example.collaborativetools.global.annotation.Password;
+import com.example.collaborativetools.global.annotation.Username;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class LoginRequestDto {
+    @Username
     private String username;
+    @Password
     private String password;
 }

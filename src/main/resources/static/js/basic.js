@@ -38,6 +38,7 @@ function authorizationCheck() {
             logout();
         });
 }
+
 function logout() {
     // 토큰 삭제
     Cookies.remove('Authorization', {path: '/'});
@@ -57,4 +58,44 @@ function getToken() {
 //modal 내 close 버튼 클릭 시 새로고침
 function win_reload() {
     window.location.reload();
+}
+
+//비밀번호 변경
+function updatePassword() {
+    let currentPassword = $('#currentPassword').val();
+    let newPassword = $('#newPassword').val();
+    let confirmPassword = $('#confirmPassword').val();
+
+    let data = {
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
+        'confirmPassword': confirmPassword
+    };
+
+    $.ajax({
+            type: 'PUT',
+            url: '/api/users/password',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function (response) {
+                console.log(response);
+                alert(response['msg']);
+                win_reload();
+            },
+            error(error, status, request) {
+                if (error['responseJSON']['data'] != null) {
+                    let valid = error['responseJSON']['data'];
+                    let str = "";
+
+                    if (valid['newPassword']) {
+                        str += valid['newPassword'] + "\n";
+                    }
+
+                    alert(str);
+                } else {
+                    alert(error['responseJSON']['msg']);
+                }
+            }
+        }
+    );
 }

@@ -5,6 +5,7 @@ import com.example.collaborativetools.global.dto.BaseResponse;
 import com.example.collaborativetools.global.jwt.JwtUtil;
 import com.example.collaborativetools.global.jwt.UserDetailsImpl;
 import com.example.collaborativetools.user.dto.LoginRequestDto;
+import com.example.collaborativetools.user.dto.PasswordRequestDto;
 import com.example.collaborativetools.user.dto.SignupRequestDto;
 import com.example.collaborativetools.user.service.UserService;
 import jakarta.validation.Valid;
@@ -14,8 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import static com.example.collaborativetools.global.constant.ResponseCode.LOGIN;
-import static com.example.collaborativetools.global.constant.ResponseCode.SIGNUP;
+import static com.example.collaborativetools.global.constant.ResponseCode.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,7 +33,7 @@ public class UserController {
     }
 
     @PostMapping("/users/login")
-    public ResponseEntity<BaseResponse<String>> login(@Valid @RequestBody LoginRequestDto userRequestDto) {
+    public ResponseEntity<BaseResponse<String>> login(@RequestBody @Valid LoginRequestDto userRequestDto) {
         userService.login(userRequestDto);
 
         String token = jwtUtil.createToken(userRequestDto.getUsername());
@@ -49,4 +49,10 @@ public class UserController {
         return userDetails.getUser().getUsername();
     }
 
+    @PutMapping("/users/password")
+    public ResponseEntity<BaseResponse<String>> updatePassword(@RequestBody @Valid PasswordRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.updatePassword(requestDto, userDetails.getUser());
+        return ResponseEntity.ok()
+                .body(BaseResponse.of(UPDATE_PASSWORD, ""));
+    }
 }
