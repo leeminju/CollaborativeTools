@@ -10,26 +10,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
 @Table(name = "boards")
+@Builder
 public class Board extends Timestamped {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @Column(nullable = false)
-    private String title;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false)
-    private String description;
+  @Column(nullable = false)
+  private String title;
 
-    @Column(name = "background_color", nullable = false)
-    private String backgroundColor;
+  @Column(nullable = false)
+  private String description;
 
-    @OneToMany(mappedBy = "board")
-    private List<UserBoard> userBoardList = new ArrayList<>();
+  @Column(name = "background_color")
+  private String backgroundColor;
 
-    @OneToMany(mappedBy = "board")
-    private List<Columns> columnsSet = new ArrayList<>();
+  @OneToMany(mappedBy = "board")
+  private List<UserBoard> userBoardList = new ArrayList<>();
+
+
+  @OneToMany(mappedBy = "board",cascade = CascadeType.REMOVE)
+  private List<Columns> columnsSet = new ArrayList<>();
+
+  public void updateBoard(String title, String description, String backgroundColor) {
+    this.title = title;
+    this.description = description;
+    this.backgroundColor = backgroundColor;
+  }
+
 }

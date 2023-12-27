@@ -14,9 +14,11 @@ public enum ErrorCode {
     /* 401 UNAUTHORIZED  :  인증 되지 않음 */
 
     /* 403 FORBIDDEN  :  권한 없음 */
-
+    NO_BOARD_AUTHORITY_EXCEPTION(403,"보드 권한 없습니다."),
     /* 404 NOT_FOUND : Resource 권한이 없음 */
-
+    NOT_FOUND_USER_EXCEPTION(404,"해당 유저는 없습니다."),
+    NOT_FOUND_BOARD_EXCEPTION(404,"해당 보드는 없습니다."),
+    NOT_FOUND_USER_BOARD_EXCEPTION(404,"해당 유저에 관한 보드는 없습니다."),
     /* 404 NOT_FOUND : Resource 를 찾을 수 없음 */
 
     /* 409 CONFLICT : Resource 중복 */

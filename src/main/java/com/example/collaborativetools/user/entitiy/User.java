@@ -1,6 +1,9 @@
 package com.example.collaborativetools.user.entitiy;
 
+import com.example.collaborativetools.userboard.entity.UserBoard;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,4 +23,7 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+
+
 }
