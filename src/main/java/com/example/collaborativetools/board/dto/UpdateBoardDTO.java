@@ -21,12 +21,13 @@ public class UpdateBoardDTO {
 
   @Builder
   public record Response(
-      Long id, String title, String desc, String backgroundColor, LocalDateTime createdAt) {
+      Long boardId, String title, String desc, String backgroundColor, LocalDateTime createdAt) {
 
     public static UpdateBoardDTO.Response of(Board board) {
       return UpdateBoardDTO.Response.builder()
-          .id(board.getId())
+          .boardId(board.getId())
           .title(board.getTitle())
+          .desc(board.getDescription())
           .backgroundColor(board.getBackgroundColor())
           .createdAt(board.getCreatedAt())
           .build();

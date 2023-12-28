@@ -7,13 +7,14 @@ import lombok.Builder;
 
 @Builder
 public record GetResponseBoardDTO(
-    Long id, String title, String desc, String backgroundColor, LocalDateTime modifiedAt
+    Long boardId, String title, String desc, String backgroundColor, LocalDateTime modifiedAt
 ) {
 
   public static GetResponseBoardDTO of(Board board) {
     return GetResponseBoardDTO.builder()
-        .id(board.getId())
+        .boardId(board.getId())
         .title(board.getTitle())
+        .desc(board.getDescription())
         .backgroundColor(board.getBackgroundColor())
         .modifiedAt(board.getModifiedAt())
         .build();

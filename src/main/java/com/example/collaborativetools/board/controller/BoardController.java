@@ -4,12 +4,14 @@ import static com.example.collaborativetools.global.constant.ResponseCode.*;
 
 import com.example.collaborativetools.board.dto.CreateBoardDTO;
 import com.example.collaborativetools.board.dto.CreateBoardDTO.Response;
+import com.example.collaborativetools.board.dto.GetMemberResponseBoardDTO;
 import com.example.collaborativetools.board.dto.GetResponseBoardDTO;
 import com.example.collaborativetools.board.dto.InviteRequestBoardDTO;
 import com.example.collaborativetools.board.dto.UpdateBoardDTO;
 import com.example.collaborativetools.board.service.BoardService;
 import com.example.collaborativetools.global.dto.BaseResponse;
 import com.example.collaborativetools.global.jwt.UserDetailsImpl;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -34,10 +36,11 @@ public class BoardController {
   //보드 생성
   @PostMapping()
   public ResponseEntity<BaseResponse<CreateBoardDTO.Response>> createBoard(
-      @RequestBody CreateBoardDTO.Request request,
+      @Valid @RequestBody CreateBoardDTO.Request request,
       @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-    CreateBoardDTO.Response responseDTO = boardService.createBoard(request,userDetails.getUser().getId());
+    CreateBoardDTO.Response responseDTO = boardService.createBoard(request,
+        userDetails.getUser().getId());
 
     return ResponseEntity.status(HttpStatus.CREATED).body(
         BaseResponse.of(CREATED_BOARD, responseDTO));
@@ -46,9 +49,10 @@ public class BoardController {
   //로그인중 유저 보드 조회
   @GetMapping()
   public ResponseEntity<BaseResponse<List<GetResponseBoardDTO>>> getBoard(
-      @AuthenticationPrincipal UserDetailsImpl userDetails ){
+      @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-    List<GetResponseBoardDTO> responseBoardDTOList = boardService.getBoard(userDetails.getUser().getId());
+    List<GetResponseBoardDTO> responseBoardDTOList = boardService.getBoard(
+        userDetails.getUser().getId());
 
     return ResponseEntity.status(HttpStatus.OK).body(
         BaseResponse.of(GET_BOARD, responseBoardDTOList));
@@ -58,10 +62,11 @@ public class BoardController {
   @PutMapping("/{boardId}")
   public ResponseEntity<BaseResponse<UpdateBoardDTO.Response>> updateBoard(
       @PathVariable Long boardId,
-      @RequestBody UpdateBoardDTO.Request request,
-      @AuthenticationPrincipal UserDetailsImpl userDetails){
+      @Valid @RequestBody UpdateBoardDTO.Request request,
+      @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-    UpdateBoardDTO.Response responseDTO = boardService.updateBoard(boardId,request,userDetails.getUser().getId());
+    UpdateBoardDTO.Response responseDTO = boardService.updateBoard(boardId, request,
+        userDetails.getUser().getId());
 
     return ResponseEntity.status(HttpStatus.OK).body(
         BaseResponse.of(UPDATE_BOARD, responseDTO));
@@ -72,29 +77,41 @@ public class BoardController {
   @DeleteMapping("/{boardId}")
   public ResponseEntity<BaseResponse<String>> deleteBoard(
       @PathVariable Long boardId,
-      @AuthenticationPrincipal UserDetailsImpl userDetails){
+      @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-    boardService.deleteBoard(boardId,userDetails.getUser().getId());
+    boardService.deleteBoard(boardId, userDetails.getUser().getId());
 
     return ResponseEntity.status(HttpStatus.OK).body(
-        BaseResponse.of(DELETE_BOARD,"삭제 완료"));
+        BaseResponse.of(DELETE_BOARD, String.format("%d번 보드 삭제 완료", boardId)));
   }
 
   //보드 멤버 초대
   @PostMapping("/{boardId}/users")
-  public  ResponseEntity<BaseResponse<String>> inviteMemberToBoard(
+  public ResponseEntity<BaseResponse<String>> inviteMemberToBoard(
       @PathVariable Long boardId,
-      @RequestBody InviteRequestBoardDTO request,
+      @Valid @RequestBody InviteRequestBoardDTO request,
       @AuthenticationPrincipal UserDetailsImpl userDetails
-  ){
+  ) {
 
-    boardService.inviteMemberToBoard(boardId,request,userDetails.getUser().getId());
+    boardService.inviteMemberToBoard(boardId, request, userDetails.getUser().getId());
 
     return ResponseEntity.status(HttpStatus.OK).body(
-        BaseResponse.of(INVITE_BOARD,"초대 완료"));
+        BaseResponse.of(INVITE_BOARD, request.username() + " 초대 완료"));
   }
 
+  // 보드 내 멤버 조회
+  @GetMapping("/{boardId}/users")
+  public ResponseEntity<BaseResponse<List<GetMemberResponseBoardDTO>>> getMemberToBoard(
+      @PathVariable Long boardId,
+      @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
+    List<GetMemberResponseBoardDTO> ResponseDTO = boardService.getMemberToBoard(boardId,
+        userDetails.getUser().getId());
+
+    return ResponseEntity.status(HttpStatus.OK).body(
+        BaseResponse.of(GET_MEMBER_BOARD, ResponseDTO));
+
+  }
 
 
 }

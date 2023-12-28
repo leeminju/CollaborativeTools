@@ -30,12 +30,12 @@ public class Board extends Timestamped {
   @Column(name = "background_color")
   private String backgroundColor;
 
-  @OneToMany(mappedBy = "board")
+  @OneToMany(mappedBy = "board",cascade = CascadeType.REMOVE)
   private List<UserBoard> userBoardList = new ArrayList<>();
 
 
   @OneToMany(mappedBy = "board",cascade = CascadeType.REMOVE)
-  private List<Columns> columnsSet = new ArrayList<>();
+  private List<Columns> columnsList = new ArrayList<>();
 
   public void updateBoard(String title, String description, String backgroundColor) {
     this.title = title;
