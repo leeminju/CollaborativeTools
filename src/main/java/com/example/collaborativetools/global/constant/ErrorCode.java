@@ -36,6 +36,7 @@ public enum ErrorCode {
 
     /* 409 CONFLICT : Resource 중복 */
     IS_DUPLICATE_USERNAME(409, "중복된 username입니다."),
+    USER_ALREADY_JOINED_BOARD(409,"이미 보드에 참여중인 유저 입니다."),
 
     /* 500 INTERNAL_SERVER_ERROR : 서버 에러 */
     INTERNAL_SERVER_ERROR(500, "내부 서버 에러입니다.");

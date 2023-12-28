@@ -8,7 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 public interface UserBoardRepository extends JpaRepository<UserBoard,Long> {
 
 
-  UserBoard findByUserIdAndBoardId(Long boardId, Long userId);
+  UserBoard findByUserIdAndBoardId(Long userId, Long boardId);
 
 
+  List<UserBoard> findByUserId(Long userId);
 }
