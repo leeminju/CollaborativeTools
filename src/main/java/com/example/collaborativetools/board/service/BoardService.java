@@ -44,8 +44,8 @@ public class BoardService {
 
 
   public List<GetResponseBoardDTO> getBoard(Long userId) {
-
-    List<UserBoard> userBoardList = userBoardRepository.findByUserId(userId);
+    User user = findUser(userId);
+    List<UserBoard> userBoardList = user.getUserBoardList();
 
     return userBoardList.stream().map(userBoard -> GetResponseBoardDTO.of(userBoard.getBoard()))
         .toList();
@@ -55,7 +55,7 @@ public class BoardService {
   public UpdateBoardDTO.Response updateBoard(Long boardId, UpdateBoardDTO.Request request,
       Long userId) {
 
-    UserBoard userBoard = findUserBoard(userId, boardId, "Yes");
+    UserBoard userBoard = findUserBoard(boardId, userId, "Yes");
 
     Board board = userBoard.getBoard();
 
@@ -65,7 +65,7 @@ public class BoardService {
   }
 
   public void deleteBoard(Long boardId, Long userId) {
-    UserBoard userBoard = findUserBoard(userId, boardId, "Yes");
+    UserBoard userBoard = findUserBoard(boardId, userId, "Yes");
 
     Board board = userBoard.getBoard();
 
@@ -78,16 +78,9 @@ public class BoardService {
         new ApiException(NOT_FOUND_USER_EXCEPTION));
 
     // 초대 하려는 유저가 해당 보드에 참여중인지 확인
-    UserBoard userBoardCheck = findUserBoard(userId, boardId, "No");
+    UserBoard userBoardCheck = findUserBoard(boardId, userId, "No");
 
-    // 초대 받으려는 유저가 이미 해당 보드에 참여중인지
-    for (UserBoard userBoard : userBoardCheck.getBoard().getUserBoardList()) {
-      if (userBoard.getUser().getId().equals(inviteUser.getId())) {
-        throw new ApiException(USER_ALREADY_JOINED_BOARD);
-      }
-    }
-
-    // 초대 받으려는 유저 해당 보드에 참여 시키기
+    // 초대 받는 유저 해당 보드에 참여
     UserBoard userBoard = UserBoard.createUserBoard(userBoardCheck.getBoard(), inviteUser,
         UserRoleEnum.USER);
     userBoardRepository.save(userBoard);
@@ -95,14 +88,21 @@ public class BoardService {
 
   public List<GetMemberResponseBoardDTO> getMemberToBoard(Long boardId, Long userId) {
     // 멤버 조회 하려는 보드에 현재 로그인중 유저가 보드에 참여중인지
-    UserBoard userBoardCheck = findUserBoard(userId, boardId, "No");
+    UserBoard userBoardCheck = findUserBoard(boardId, userId, "No");
 
+    //1.첫번째 방법
+    //보드 엔티티의 UserBoard리스트 
     List<UserBoard> userBoardList = userBoardCheck.getBoard().getUserBoardList();
     return userBoardList.stream()
         .map(userBoard -> GetMemberResponseBoardDTO.of(userBoard.getUser())).toList();
+
+    //2.두번째 방법
+
+
   }
 
-  private UserBoard findUserBoard(Long userId, Long boardId, String adminCheck) {
+
+  private UserBoard findUserBoard(Long boardId, Long userId, String adminCheck) {
     UserBoard userBoard = userBoardRepository.findByUserIdAndBoardId(userId, boardId);
 
     if (userBoard == null) {
