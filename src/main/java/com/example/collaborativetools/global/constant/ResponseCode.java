@@ -8,7 +8,7 @@ import lombok.Getter;
 public enum ResponseCode {
 
     /* 200 OK */
-
+    GET_COLUMNS(200, "컬럼 조회 완료"),
     UPDATED_COLUMNS(200, "컬럼 수정 완료"),
     DELETED_COLUMNS(200, "컬럼 삭제 완료"),
 

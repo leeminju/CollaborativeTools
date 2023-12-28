@@ -2,9 +2,14 @@ package com.example.collaborativetools.column.controller;
 
 import static com.example.collaborativetools.global.constant.ResponseCode.*;
 
+import java.util.Set;
+
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -45,6 +50,24 @@ public class ColumnApiController {
 				)
 			);
 	}
+
+	//컬럼리스트 + 카드포함 조회
+	@GetMapping
+	public ResponseEntity<BaseResponse<Set<ColumnResponse>>> getColumns(
+		@AuthenticationPrincipal UserDetailsImpl userDetails,
+		@SortDefault(sort = "sequence", direction = Sort.Direction.ASC) Sort sort
+	) {
+		User user = userDetails.getUser();
+		Set<ColumnResponse> response = columnService.getColumns(sort, user);
+		return ResponseEntity.status(GET_COLUMNS.getHttpStatus())
+			.body(
+				BaseResponse.of(
+					GET_COLUMNS,
+					response
+				)
+			);
+	}
+
 	//컬럼수정
 	@PutMapping("/{columnId}")
 	public ResponseEntity<BaseResponse<ColumnResponse>> updateColumn(
