@@ -33,7 +33,21 @@
                         window.location.href = '/login';
                     },
                     error(error, status, request) {
-                        alert(error['responseJSON']['msg']);
+                        if (error['responseJSON']['data'] != null) {
+                            let valid = error['responseJSON']['data'];
+                            let str = "";
+
+                            if (valid['password']) {
+                                str += valid['password'] +"\n";
+                            }
+
+                            if (valid['username']) {
+                                str += valid['username'] +"\n";
+                            }
+                            alert(str);
+                        } else {
+                            alert(error['responseJSON']['msg']);
+                        }
                     }
                 }
             );
