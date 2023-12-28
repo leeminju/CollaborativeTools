@@ -1,6 +1,6 @@
-package com.example.collaborativetools.global.validator;
+package com.example.collaborativetools.user.validator;
 
-import com.example.collaborativetools.global.annotation.Password;
+import com.example.collaborativetools.user.annotation.Password;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

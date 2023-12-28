@@ -1,7 +1,7 @@
 package com.example.collaborativetools.user.dto;
 
-import com.example.collaborativetools.global.annotation.Password;
-import com.example.collaborativetools.global.annotation.Username;
+import com.example.collaborativetools.user.annotation.Password;
+import com.example.collaborativetools.user.annotation.Username;
 import lombok.Getter;
 
 @Getter
