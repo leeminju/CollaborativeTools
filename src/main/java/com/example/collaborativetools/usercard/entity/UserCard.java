@@ -2,13 +2,15 @@ package com.example.collaborativetools.usercard.entity;
 
 import com.example.collaborativetools.card.entitiy.Card;
 import com.example.collaborativetools.user.entitiy.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "user_cards")
 public class UserCard {
@@ -18,6 +20,7 @@ public class UserCard {
     private Long id;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "card_id", nullable = false)
     private Card card;
 
