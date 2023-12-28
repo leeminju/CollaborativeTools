@@ -7,7 +7,7 @@ import com.example.collaborativetools.board.entitiy.Board;
 import com.example.collaborativetools.card.entitiy.Card;
 import com.example.collaborativetools.global.entity.Timestamped;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,12 +19,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -45,16 +41,13 @@ public class Columns extends Timestamped {
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
 
-    @OneToMany(mappedBy = "column")
-    @JsonIgnore
-    private List<Card> cards;
-
     @OneToMany(
         fetch = FetchType.LAZY,
         mappedBy = "column",
         cascade = CascadeType.REMOVE,
         orphanRemoval = true
     )
+    @JsonIgnore
     private Set<Card> cards = new LinkedHashSet<>();
 
     public Columns(String title, Integer sequence, Board board) {
@@ -72,4 +65,5 @@ public class Columns extends Timestamped {
         this.sequence = sequence;
         this.board = board;
 
+    }
 }
