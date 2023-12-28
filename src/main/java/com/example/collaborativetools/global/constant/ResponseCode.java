@@ -12,6 +12,9 @@ public enum ResponseCode {
     UPDATED_COLUMNS(200, "컬럼 수정 완료"),
     DELETED_COLUMNS(200, "컬럼 삭제 완료"),
 
+    UPDATED_COMMENT(200, "댓글 수정 완료"),
+    DELETED_COMMENT(200, "댓글 삭제 완료"),
+
     GET_BOARD(200, "보드 조회 완료"),
     UPDATE_BOARD(200, "보드 수정 완료"),
     DELETE_BOARD(200, "보드 삭제 완료"),
@@ -28,7 +31,8 @@ public enum ResponseCode {
     CREATED_BOARD(201, "게시판 생성 완료"),
     CREATED_COLUMNS(201, "컬럼 추가 완료"),
     CREATED_LIKE(201, "카드 추가 완료"),
-    DELETED_CARD(200,"카드 삭제 완료");
+    DELETED_CARD(200,"카드 삭제 완료"),
+    CREATED_COMMENT(201, "댓글 추가 완료");
 
     private final int httpStatus;
     private final String message;

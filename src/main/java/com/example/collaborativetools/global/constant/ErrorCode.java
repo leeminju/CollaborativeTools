@@ -19,6 +19,7 @@ public enum ErrorCode {
 
     /* 403 FORBIDDEN  :  권한 없음 */
     NO_BOARD_AUTHORITY_EXCEPTION(403, "보드 권한 없습니다."),
+    NO_COMMENT_AUTHORITY_EXCEPTION(403, "댓글 권한 없습니다."),
   
     /* 404 NOT_FOUND : Resource 권한이 없음 */
     NOT_FOUND_USER_EXCEPTION(404, "해당 유저는 없습니다."),
@@ -31,6 +32,7 @@ public enum ErrorCode {
     NOT_FOUND_COLUMN(404, "존재하지 않는 컬럼 입니다."),
 
     NOT_FOUND_CARD(404,"존재하지 않는 카드입니다."),
+    NOT_FOUND_COMMENT(404,"존재하지 않는 댓글입니다."),
 
 
 
