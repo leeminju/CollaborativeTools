@@ -17,8 +17,9 @@ public enum ResponseCode {
     DELETE_BOARD(200, "보드 삭제 완료"),
     INVITE_BOARD(200, "보드 유저 초대 완료"),
     GET_MEMBER_BOARD(200, "보드 멤버 조회 완료"),
-  
+
     LOGIN(200, "로그인 성공"),
+    LOGOUT(200, "로그아웃 성공"),
     UPDATE_PASSWORD(200, "비밀번호 변경 완료"),
     UNREGISTER_USER(200, "회원 탈퇴 완료"),
     GET_USER_INFO(200, "회원 정보 조회 완료"),
@@ -28,7 +29,8 @@ public enum ResponseCode {
     CREATED_BOARD(201, "게시판 생성 완료"),
     CREATED_COLUMNS(201, "컬럼 추가 완료"),
     CREATED_LIKE(201, "카드 추가 완료"),
-    DELETED_CARD(200,"카드 삭제 완료");
+    DELETED_CARD(200, "카드 삭제 완료"),
+    REISSUE_TOKEN(201, "토큰 재발급 완료");
 
     private final int httpStatus;
     private final String message;

@@ -10,10 +10,10 @@ function authorizationCheck() {
     const auth = getToken();
 
     if (auth !== undefined && auth !== '') {
-        console.log(auth);
         $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
             jqXHR.setRequestHeader('Authorization', auth);
         });
+
     } else {
         window.location.href = host + '/login';
         return;
@@ -43,9 +43,24 @@ function authorizationCheck() {
 
 function logout() {
     // 토큰 삭제
-    Cookies.remove('Authorization', {path: '/'});
-    window.location.href = host + '/login';
+    $.ajax({
+            type: 'DELETE',
+            url: `/api/users/logout`,
+            success: function (response) {
+                Cookies.remove('Authorization', {path: '/'});
+                Cookies.remove('RefreshToken', {path: '/'});
+                console.log(response);
+                alert(response['msg']);
+                window.location.href = host + '/login';
+            },
+            error(error, status, request) {
+                console.log(error);
+            }
+        }
+    );
+
 }
+
 
 function getToken() {
     let auth = Cookies.get('Authorization');
