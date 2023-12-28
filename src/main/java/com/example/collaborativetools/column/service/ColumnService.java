@@ -3,6 +3,7 @@ package com.example.collaborativetools.column.service;
 import static com.example.collaborativetools.global.constant.ErrorCode.*;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.collaborativetools.board.entitiy.Board;
 import com.example.collaborativetools.board.repository.BoardRepository;
@@ -22,6 +23,7 @@ public class ColumnService {
 	private final BoardRepository boardRepository;
 	private final ColumnRepository columnRepository;
 
+	@Transactional
 	public ColumnResponse createColumn(ColumnCreateRequest request, User loginUser) {
 		// TODO: 12/27/23 로그인 유저정보로 UserBoard에 해당 유저 존재하는지 검증 구현 필요
 
@@ -33,6 +35,7 @@ public class ColumnService {
 		return ColumnResponse.from(column);
 	}
 
+	@Transactional
 	public ColumnResponse updateColumn(Long columnId, ColumnUpdateRequest request, User loginUser) {
 		Board board = boardRepository.findById(request.getBoardId())
 			.orElseThrow(() -> new ApiException(NOT_FOUND_BOARD));
@@ -50,7 +53,7 @@ public class ColumnService {
 		return ColumnResponse.from(column);
 	}
 
-
+	@Transactional
 	public void deleteColumn(Long columnId, User loginUser) {
 		Columns column = columnRepository.findById(columnId)
 			.orElseThrow(() -> new ApiException(NOT_FOUND_COLUMN));
