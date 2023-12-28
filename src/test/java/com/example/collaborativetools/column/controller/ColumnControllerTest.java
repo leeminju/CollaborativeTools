@@ -87,7 +87,7 @@ class ColumnControllerTest {
 		Columns column = getColumn(request, columnId);
 
 		given(columnService.createColumn(any(), any())).willReturn(
-			ColumnResponse.of(column)
+			ColumnResponse.from(column)
 		);
 
 		//When

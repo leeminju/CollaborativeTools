@@ -4,6 +4,7 @@ import static com.example.collaborativetools.global.constant.ResponseCode.*;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -43,5 +44,32 @@ public class ColumnApiController {
 					response
 				)
 			);
+	}
+	//컬럼수정
+	@PutMapping("/{columnId}")
+	public ResponseEntity<BaseResponse<ColumnResponse>> updateColumn(
+		@PathVariable Long columnId,
+		@Valid @RequestBody ColumnUpdateRequest request,
+		@AuthenticationPrincipal UserDetailsImpl userDetails
+	) {
+		User user = userDetails.getUser();
+		ColumnResponse response = columnService.updateColumn(columnId, request, user);
+		return ResponseEntity.status(UPDATED_COLUMNS.getHttpStatus())
+			.body(
+				BaseResponse.of(
+					UPDATED_COLUMNS,
+					response
+				)
+			);
+	}
+
+	//컬럼삭제
+	@DeleteMapping("/{columnId}")
+	public void deleteColumn(
+		@PathVariable Long columnId,
+		@AuthenticationPrincipal UserDetailsImpl userDetails
+	) {
+		User user = userDetails.getUser();
+		columnService.deleteColumn(columnId, userDetails.getUser());
 	}
 }

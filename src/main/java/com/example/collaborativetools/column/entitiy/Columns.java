@@ -43,4 +43,10 @@ public class Columns extends Timestamped {
     public static Columns create(String title, Integer sequence, Board board) {
         return new Columns(title, sequence, board);
     }
+
+    public void update(String title, Integer sequence, Board board) {
+        this.title = title;
+        this.sequence = sequence;
+        this.board = board;
+    }
 }

@@ -8,7 +8,7 @@ import lombok.Getter;
 public enum ResponseCode {
 
     /* 200 OK */
-
+    UPDATED_COLUMNS(200, "컬럼 수정 완료"),
 
     /* 201 CREATED : Resource 생성 완료 */
     SIGNUP(201, "회원가입 성공"),

@@ -13,7 +13,7 @@ public class ColumnResponse {
 	private final String title;
 	private final Integer sequence;
 
-	public static ColumnResponse of(Columns entity) {
+	public static ColumnResponse from(Columns entity) {
 		return new ColumnResponse(
 			entity.getId(),
 			entity.getBoard().getId(),
