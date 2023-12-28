@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.example.collaborativetools.board.entitiy.Board;
 import com.example.collaborativetools.card.entitiy.Card;
+import com.example.collaborativetools.column.dto.request.ColumnUpdateRequest;
 import com.example.collaborativetools.global.entity.Timestamped;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -52,7 +53,7 @@ public class Columns extends Timestamped {
     @JsonIgnore
     private Set<Card> cards = new LinkedHashSet<>();
 
-    public Columns(String title, Integer sequence, Board board) {
+    private Columns(String title, Integer sequence, Board board) {
         this.title = title;
         this.sequence = sequence;
         this.board = board;
@@ -62,10 +63,8 @@ public class Columns extends Timestamped {
         return new Columns(title, sequence, board);
     }
 
-    public void update(String title, Integer sequence, Board board) {
-        this.title = title;
-        this.sequence = sequence;
-        this.board = board;
-
+    public void update(ColumnUpdateRequest request) {
+        this.title = request.getTitle();
+        this.sequence = request.getSequence();
     }
 }
