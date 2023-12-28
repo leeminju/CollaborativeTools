@@ -1,8 +1,23 @@
 package com.example.collaborativetools.column.entitiy;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import com.example.collaborativetools.board.entitiy.Board;
+import com.example.collaborativetools.card.entitiy.Card;
 import com.example.collaborativetools.global.entity.Timestamped;
-import jakarta.persistence.*;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,4 +40,28 @@ public class Columns extends Timestamped {
     @ManyToOne
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
+
+    @OneToMany(
+        fetch = FetchType.LAZY,
+        mappedBy = "column",
+        cascade = CascadeType.REMOVE,
+        orphanRemoval = true
+    )
+    private Set<Card> cards = new LinkedHashSet<>();
+
+    public Columns(String title, Integer sequence, Board board) {
+        this.title = title;
+        this.sequence = sequence;
+        this.board = board;
+    }
+
+    public static Columns create(String title, Integer sequence, Board board) {
+        return new Columns(title, sequence, board);
+    }
+
+    public void update(String title, Integer sequence, Board board) {
+        this.title = title;
+        this.sequence = sequence;
+        this.board = board;
+    }
 }
