@@ -7,6 +7,7 @@ import com.example.collaborativetools.global.jwt.UserDetailsImpl;
 import com.example.collaborativetools.user.dto.LoginRequestDto;
 import com.example.collaborativetools.user.dto.PasswordRequestDto;
 import com.example.collaborativetools.user.dto.SignupRequestDto;
+import com.example.collaborativetools.user.dto.UserInfoDto;
 import com.example.collaborativetools.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,10 +27,10 @@ public class UserController {
     private final JwtUtil jwtUtil;
 
     @PostMapping("/users/signup")
-    public ResponseEntity<BaseResponse<String>> signup(@RequestBody @Valid SignupRequestDto requestDto) {
-        userService.signup(requestDto);
+    public ResponseEntity<BaseResponse<UserInfoDto>> signup(@RequestBody @Valid SignupRequestDto requestDto) {
+        UserInfoDto userInfoDto = userService.signup(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).
-                body(BaseResponse.of(SIGNUP, ""));
+                body(BaseResponse.of(SIGNUP, userInfoDto));
     }
 
     @PostMapping("/users/login")
@@ -43,24 +44,27 @@ public class UserController {
                 .body(BaseResponse.of(LOGIN, ""));
     }
 
-    // 로그인 사용자 이름 받기
-    @GetMapping("/user-info")
-    public String getUsername(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return userDetails.getUser().getUsername();
+    // 로그인 사용자 정보 받기
+    @GetMapping("/users")
+    public ResponseEntity<BaseResponse<UserInfoDto>> getUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        UserInfoDto info = userService.getUserInfo(userDetails.getUser());
+        return ResponseEntity.ok()
+                .body(BaseResponse.of(GET_USER_INFO, info));
     }
 
+
     //비밀번호 변경
-    @PutMapping("/users/password")
-    public ResponseEntity<BaseResponse<String>> updatePassword(@RequestBody @Valid PasswordRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        userService.updatePassword(requestDto, userDetails.getUser());
+    @PutMapping("/users/{userId}/password")
+    public ResponseEntity<BaseResponse<String>> updatePassword(@PathVariable Long userId, @RequestBody @Valid PasswordRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.updatePassword(userId,requestDto, userDetails.getUser());
         return ResponseEntity.ok()
                 .body(BaseResponse.of(UPDATE_PASSWORD, ""));
     }
 
     //회원 탈퇴
-    @DeleteMapping("/users")
-    public ResponseEntity<BaseResponse<String>> unregister(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        userService.unregister( userDetails.getUser());
+    @DeleteMapping("/users/{userId}")
+    public ResponseEntity<BaseResponse<String>> unregister(@PathVariable Long userId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.unregister(userId,userDetails.getUser());
         return ResponseEntity.ok()
                 .body(BaseResponse.of(UNREGISTER_USER, ""));
     }

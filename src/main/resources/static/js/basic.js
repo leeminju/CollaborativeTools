@@ -1,5 +1,5 @@
 const host = 'http://' + window.location.host;
-
+var userId = -1;
 // 화면 시작하자마자
 $(document).ready(function () {
     authorizationCheck();//인가
@@ -10,6 +10,7 @@ function authorizationCheck() {
     const auth = getToken();
 
     if (auth !== undefined && auth !== '') {
+        console.log(auth);
         $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
             jqXHR.setRequestHeader('Authorization', auth);
         });
@@ -18,10 +19,11 @@ function authorizationCheck() {
         return;
     }
 
+
     //로그인한 회원 정보
     $.ajax({
         type: 'GET',
-        url: `/api/user-info`,
+        url: `/api/users`,
         contentType: 'application/json',
     })
         .done(function (res, status, xhr) {
@@ -31,8 +33,8 @@ function authorizationCheck() {
                 window.location.href = '/login';
                 return;
             }
-
-            $('#username').text(username);
+            userId = Number(res['data']['id']);
+            $('#username').text(res['data']['username']);
         })
         .fail(function (jqXHR, textStatus) {
             logout();
@@ -62,6 +64,7 @@ function win_reload() {
 
 //비밀번호 변경
 function updatePassword() {
+
     let currentPassword = $('#currentPassword').val();
     let newPassword = $('#newPassword').val();
     let confirmPassword = $('#confirmPassword').val();
@@ -74,7 +77,7 @@ function updatePassword() {
 
     $.ajax({
             type: 'PUT',
-            url: '/api/users/password',
+            url: `/api/users/${userId}/password`,
             contentType: 'application/json',
             data: JSON.stringify(data),
             success: function (response) {
@@ -102,9 +105,10 @@ function updatePassword() {
 
 //회원탈퇴
 function unRegister() {
+
     $.ajax({
             type: 'DELETE',
-            url: '/api/users',
+            url: `/api/users/${userId}`,
             success: function (response) {
                 alert(response['msg']);
                 logout();

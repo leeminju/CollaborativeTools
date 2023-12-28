@@ -9,8 +9,9 @@ public enum ResponseCode {
 
     /* 200 OK */
     LOGIN(200, "로그인 성공"),
-    UPDATE_PASSWORD(201, "비밀번호 변경 완료"),
-    UNREGISTER_USER(201, "회원 탈퇴 완료"),
+    UPDATE_PASSWORD(200, "비밀번호 변경 완료"),
+    UNREGISTER_USER(200, "회원 탈퇴 완료"),
+    GET_USER_INFO(200, "회원 정보 조회 완료"),
 
     /* 201 CREATED : Resource 생성 완료 */
     SIGNUP(201, "회원가입 성공"),
