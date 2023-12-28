@@ -1,6 +1,9 @@
 package com.example.collaborativetools.user.service;
 
+import com.example.collaborativetools.board.entitiy.Board;
+import com.example.collaborativetools.board.repository.BoardRepository;
 import com.example.collaborativetools.global.constant.ErrorCode;
+import com.example.collaborativetools.global.constant.UserRoleEnum;
 import com.example.collaborativetools.global.exception.ApiException;
 import com.example.collaborativetools.user.dto.LoginRequestDto;
 import com.example.collaborativetools.user.dto.PasswordRequestDto;
@@ -8,11 +11,14 @@ import com.example.collaborativetools.user.dto.SignupRequestDto;
 import com.example.collaborativetools.user.dto.UserInfoDto;
 import com.example.collaborativetools.user.entitiy.User;
 import com.example.collaborativetools.user.repository.UserRepository;
+import com.example.collaborativetools.userboard.entity.UserBoard;
+import com.example.collaborativetools.userboard.repository.UserBoardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -20,6 +26,7 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final BoardRepository boardRepository;
 
     public UserInfoDto signup(SignupRequestDto requestDto) {
         String username = requestDto.getUsername();
@@ -93,7 +100,16 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new ApiException(ErrorCode.NOT_FOUND_USER)
         );
-        //연관관계 모두 끊어버리고 탈퇴해야함
+        //해당유저가 관리자인 보드를 모두 없애버림
+        List<UserBoard> userBoardList = user.getUserBoardList();
+        for (UserBoard userBoard : userBoardList) {
+            if (userBoard.getRole().equals(UserRoleEnum.ADMIN)) {
+                Board board = boardRepository.findById(userBoard.getBoard().getId()).orElseThrow(
+                        () -> new ApiException(ErrorCode.NOT_FOUND_BOARD)
+                );
+                boardRepository.delete(board);
+            }
+        }
 
         userRepository.delete(user);
     }
