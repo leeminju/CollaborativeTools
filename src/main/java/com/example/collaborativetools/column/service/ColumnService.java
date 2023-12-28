@@ -47,7 +47,6 @@ public class ColumnService {
 			.orElseThrow(() -> new ApiException(NOT_FOUND_BOARD));
 
 		checkUserPermission(board.getId(), loginUser.getId());
-		checkUserPermission(board.getId(), loginUser.getId());
 
 		Columns column = findColumn(columnId);
 		column.update(request);
