@@ -33,7 +33,7 @@ public class ColumnService {
 		return ColumnResponse.from(column);
 	}
 
-	public ColumnResponse updateColumn(Long columnId, ColumnUpdateRequest request, User user) {
+	public ColumnResponse updateColumn(Long columnId, ColumnUpdateRequest request, User loginUser) {
 		Board board = boardRepository.findById(request.getBoardId())
 			.orElseThrow(() -> new ApiException(NOT_FOUND_BOARD));
 
@@ -50,4 +50,13 @@ public class ColumnService {
 		return ColumnResponse.from(column);
 	}
 
+
+	public void deleteColumn(Long columnId, User loginUser) {
+		Columns column = columnRepository.findById(columnId)
+			.orElseThrow(() -> new ApiException(NOT_FOUND_COLUMN));
+
+		// TODO: 12/27/23 로그인 유저정보로 UserBoard에 해당 유저 존재하는지 검증 구현 필요
+
+		columnRepository.delete(column);
+	}
 }

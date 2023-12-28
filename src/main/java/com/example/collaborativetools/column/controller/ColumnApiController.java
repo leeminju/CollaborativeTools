@@ -65,11 +65,19 @@ public class ColumnApiController {
 
 	//컬럼삭제
 	@DeleteMapping("/{columnId}")
-	public void deleteColumn(
+	public ResponseEntity<BaseResponse<Void>> deleteColumn(
 		@PathVariable Long columnId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 	) {
 		User user = userDetails.getUser();
-		columnService.deleteColumn(columnId, userDetails.getUser());
+		columnService.deleteColumn(columnId, user);
+
+		return ResponseEntity.status(DELETED_COLUMNS.getHttpStatus())
+			.body(
+				BaseResponse.of(
+					DELETED_COLUMNS,
+					null
+				)
+			);
 	}
 }
