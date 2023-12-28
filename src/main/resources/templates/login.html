@@ -51,8 +51,24 @@
             contentType: "application/json",
             data: JSON.stringify({username: username, password: password}),
             error(error) {
-                let message = error['responseJSON']['msg'];
-                $('#login-failed').css('display', 'block').html(message);
+                 let str = "";
+
+                if (error['responseJSON']['data'] != null) {
+                    let valid = error['responseJSON']['data'];
+
+                    if (valid['password']) {
+                        str += valid['password'] + "\n";
+                    }
+
+                    if (valid['username']) {
+                        str += valid['username'] + "\n";
+                    }
+
+                } else {
+                    str = error['responseJSON']['msg'];
+                }
+
+                $('#login-failed').css('display', 'block').html(str);
             }
         })
             .done(function (res, status, xhr) {
