@@ -46,6 +46,7 @@ public class Card extends Timestamped {
     private Columns column;
 
     @OneToMany(mappedBy = "card",cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("createdAt DESC")
     private List<Comment> comments;
 
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
