@@ -2,6 +2,9 @@ package com.example.collaborativetools.column.service;
 
 import static com.example.collaborativetools.global.constant.ErrorCode.*;
 
+import java.util.List;
+
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,21 +17,24 @@ import com.example.collaborativetools.column.entitiy.Columns;
 import com.example.collaborativetools.column.repository.ColumnRepository;
 import com.example.collaborativetools.global.exception.ApiException;
 import com.example.collaborativetools.user.entitiy.User;
+import com.example.collaborativetools.userboard.repository.UserBoardRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
 public class ColumnService {
+	private static final Sort SORT_BY_SEQUENCE_ASC = Sort.by(Sort.Direction.ASC, "sequence");
 	private final BoardRepository boardRepository;
 	private final ColumnRepository columnRepository;
+	private final UserBoardRepository userBoardRepository;
 
 	@Transactional
 	public ColumnResponse createColumn(ColumnCreateRequest request, User loginUser) {
-		// TODO: 12/27/23 로그인 유저정보로 UserBoard에 해당 유저 존재하는지 검증 구현 필요
-
 		Board board = boardRepository.findById(request.getBoardId())
 			.orElseThrow(() -> new ApiException(NOT_FOUND_BOARD));
+
+		checkUserPermission(board.getId(), loginUser.getId());
 
 		Columns column = columnRepository.save(request.toEntity(board));
 
@@ -40,26 +46,35 @@ public class ColumnService {
 		Board board = boardRepository.findById(request.getBoardId())
 			.orElseThrow(() -> new ApiException(NOT_FOUND_BOARD));
 
-		Columns column = columnRepository.findById(columnId)
-			.orElseThrow(() -> new ApiException(NOT_FOUND_COLUMN));
+		checkUserPermission(board.getId(), loginUser.getId());
 
-		// TODO: 12/27/23 로그인 유저정보로 UserBoard에 해당 유저 존재하는지 검증 구현 필요
+		Columns column = findColumn(columnId);
+		column.update(request);
 
-		column.update(
-			request.getTitle(),
-			request.getSequence(),
-			board
-		);
 		return ColumnResponse.from(column);
 	}
 
 	@Transactional
-	public void deleteColumn(Long columnId, User loginUser) {
-		Columns column = columnRepository.findById(columnId)
-			.orElseThrow(() -> new ApiException(NOT_FOUND_COLUMN));
-
-		// TODO: 12/27/23 로그인 유저정보로 UserBoard에 해당 유저 존재하는지 검증 구현 필요
-
+	public void deleteColumn(Long columnId) {
+		Columns column = findColumn(columnId);
 		columnRepository.delete(column);
+	}
+
+	public List<ColumnResponse> getColumns() {
+		return columnRepository.findAll(SORT_BY_SEQUENCE_ASC)
+			.stream()
+			.map(ColumnResponse::from)
+			.toList();
+	}
+
+	public Columns findColumn(Long columnId) {
+		return columnRepository.findById(columnId)
+			.orElseThrow(() -> new ApiException(NOT_FOUND_COLUMN));
+	}
+
+	public void checkUserPermission(Long boardId, Long userId) {
+		if (!userBoardRepository.existsByBoardIdAndUserId(boardId, userId)) {
+			throw new ApiException(NO_BOARD_AUTHORITY_EXCEPTION);
+		}
 	}
 }

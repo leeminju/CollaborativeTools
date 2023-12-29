@@ -2,6 +2,7 @@ package com.example.collaborativetools.global.jwt;
 
 import com.example.collaborativetools.global.constant.ErrorCode;
 import com.example.collaborativetools.global.dto.BaseResponse;
+import com.example.collaborativetools.redis.dao.RedisDao;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -28,7 +29,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
-
+    private final RedisDao redisDao;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -38,10 +39,12 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         if (StringUtils.hasText(tokenValue)) {
 
-            if (!jwtUtil.validateToken(tokenValue)) {
+            var logout = redisDao.getBlackList(tokenValue);
+
+            if (!jwtUtil.validateToken(tokenValue) || logout != null) {
                 res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 res.setContentType("application/json; charset=UTF-8");
-                BaseResponse baseResponse= new BaseResponse(ErrorCode.INVALID_TOKEN.getMessage(),HttpStatus.BAD_REQUEST.value(),"");
+                BaseResponse baseResponse = new BaseResponse(ErrorCode.INVALID_TOKEN.getMessage(), HttpStatus.BAD_REQUEST.value(), "");
                 res.getWriter().write(objectMapper.writeValueAsString(baseResponse));
                 return;
             }
