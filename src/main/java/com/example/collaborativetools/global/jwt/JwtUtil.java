@@ -111,7 +111,6 @@ public class JwtUtil {
 
         Cookie cookie = new Cookie(REFRESH_TOKEN_HEADER, refreshToken); // Name-Value
         cookie.setSecure(true);
-        cookie.setHttpOnly(true);
         cookie.setPath("/");
 
         // Response 객체에 Cookie 추가

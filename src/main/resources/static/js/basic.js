@@ -49,6 +49,7 @@ function logout() {
             success: function (response) {
                 Cookies.remove('Authorization', {path: '/'});
                 Cookies.remove('RefreshToken', {path: '/'});
+
                 console.log(response);
                 alert(response['msg']);
                 window.location.href = host + '/login';
