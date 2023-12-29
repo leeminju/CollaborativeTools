@@ -88,5 +88,107 @@
     </div>
 </div>
 
+<div class="modal fade" id="inviteMember" data-bs-backdrop="static" aria-hidden="true"
+     aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">게시판 멤버 추가</h1>
+                <button onclick="win_reload()" type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <span>
+                    <input type="text" class="form-control" id="invite_member_name" placeholder="초대할 멤버">
+                    <button class="btn btn-outline-dark" onclick="inviteMember()">초대</button>
+                </span>
+
+                <label>보드 멤버 목록</label>
+                <ul class="list-group list-group-flush" id="board_member_list">
+
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button onclick="win_reload()" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close
+                </button>
+                <button class="btn btn-light" onclick="">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="createBoard" data-bs-backdrop="static" aria-hidden="true"
+     aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">게시판 추가</h1>
+                <button onclick="win_reload()" type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" id="create_board_title" placeholder="게시판 제목">
+                <input type="text" class="form-control" id="create_board_desc" placeholder="게시판 설명">
+                <label for="create_background_color">배경색 설정:</label>
+                <input type="color" id="create_background_color">
+            </div>
+            <div class="modal-footer">
+                <button onclick="win_reload()" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close
+                </button>
+                <button class="btn btn-light" onclick="createBoard()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="updateBoard" data-bs-backdrop="static" aria-hidden="true"
+     aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">게시판 편집</h1>
+                <button onclick="win_reload()" type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="text" class="form-control" id="update_board_title" placeholder="게시판 제목">
+                <input type="text" class="form-control" id="update_board_desc" placeholder="게시판 설명">
+                <label for="update_background_color">배경색 설정:</label>
+                <input type="color" id="update_background_color">
+            </div>
+
+            <div class="modal-footer">
+                <button onclick="win_reload()" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close
+                </button>
+                <button class="btn btn-light" onclick="updateBoard()" id="board_update_btn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="board">
+    <div class="board_left">
+        <div>
+            게시판 목록
+        </div>
+        <ul class="list-group list-group-flush" id="board_list">
+        </ul>
+    </div>
+
+    <div class="board_right" id="board_background">
+        <div><span id="board_title" style="font-size: 20px"></span>
+            <button style="float: right" class="btn btn-outline-dark" data-bs-toggle="modal"
+                    data-bs-target="#inviteMember" onclick="getBoardMember()" id="invite_btn">invite
+            </button>
+        </div>
+        <div id="board_desc"></div>
+
+    </div>
+</div>
+
+
 </body>
 </html>

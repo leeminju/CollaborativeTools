@@ -159,16 +159,16 @@ public class BoardService {
         new ApiException(NOT_FOUND_BOARD_EXCEPTION));
   }
 
-  public boolean isUserInvited(Long boardId, Long userId) {
-    Optional<Board> boardOptional = boardRepository.findById(boardId);
-    Optional<User> userOptional = userRepository.findById(userId);
-
-    if (boardOptional.isPresent() && userOptional.isPresent()) {
-      Board board = boardOptional.get();
-
-      return board.getUserBoardList().stream().anyMatch(userBoard -> userBoard.getUser().getId().equals(userId));
-    }
-    return false;
-  }
+//  public boolean isUserInvited(Long boardId, Long userId) {
+//    Optional<Board> boardOptional = boardRepository.findById(boardId);
+//    Optional<User> userOptional = userRepository.findById(userId);
+//
+//    if (boardOptional.isPresent() && userOptional.isPresent()) {
+//      Board board = boardOptional.get();
+//
+//      return board.getUserBoardList().stream().anyMatch(userBoard -> userBoard.getUser().getId().equals(userId));
+//    }
+//    return false;
+//  }
 
 }
