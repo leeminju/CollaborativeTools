@@ -2,22 +2,27 @@ package com.example.collaborativetools.board.service;
 
 import static com.example.collaborativetools.global.constant.ErrorCode.*;
 
+import com.example.collaborativetools.board.dto.CardInColumnDTO;
 import com.example.collaborativetools.board.dto.CreateBoardDTO;
 import com.example.collaborativetools.board.dto.CreateBoardDTO.Response;
+import com.example.collaborativetools.board.dto.GetDetailResponseBoardDTO;
 import com.example.collaborativetools.board.dto.GetMemberResponseBoardDTO;
 import com.example.collaborativetools.board.dto.GetResponseBoardDTO;
 import com.example.collaborativetools.board.dto.InviteRequestBoardDTO;
 import com.example.collaborativetools.board.dto.UpdateBoardDTO;
 import com.example.collaborativetools.board.entitiy.Board;
 import com.example.collaborativetools.board.repository.BoardRepository;
+import com.example.collaborativetools.card.entitiy.Card;
+import com.example.collaborativetools.column.entitiy.Columns;
+import com.example.collaborativetools.column.repository.ColumnRepository;
 import com.example.collaborativetools.global.constant.UserRoleEnum;
 import com.example.collaborativetools.global.exception.ApiException;
 import com.example.collaborativetools.user.entitiy.User;
 import com.example.collaborativetools.user.repository.UserRepository;
 import com.example.collaborativetools.userboard.entity.UserBoard;
 import com.example.collaborativetools.userboard.repository.UserBoardRepository;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +34,7 @@ public class BoardService {
   private final BoardRepository boardRepository;
   private final UserRepository userRepository;
   private final UserBoardRepository userBoardRepository;
+  private final ColumnRepository columnRepository;
 
   public CreateBoardDTO.Response createBoard(CreateBoardDTO.Request request, Long userId) {
     User user = findUser(userId);
@@ -102,6 +108,33 @@ public class BoardService {
         .map(userBoard -> GetMemberResponseBoardDTO.of(userBoard.getUser())).toList();
   }
 
+  public List<GetDetailResponseBoardDTO> getBoardId(Long boardId, Long userId) {
+    UserBoard userBoard = findUserBoard(userId, boardId, "No");
+
+    Board board = userBoard.getBoard();
+
+    List<GetDetailResponseBoardDTO> responseBoardDTOList = new ArrayList<>();
+
+    List<Columns> columnsList = board.getColumnsList();
+
+    //해당 보드에 컬럼들 정보 넣기
+    for (Columns columns : columnsList) {
+      List<CardInColumnDTO> cardInColumnDTOList = new ArrayList<>();
+
+      // 해당 컬럼에 카드들 정보 넣기
+      for (Card card : columns.getCards()) {
+        CardInColumnDTO cardInColumnDTO = CardInColumnDTO.builder().cardId(card.getId())
+            .cardTitle(card.getTitle()).build();
+        cardInColumnDTOList.add(cardInColumnDTO);
+      }
+
+      responseBoardDTOList.add(GetDetailResponseBoardDTO.of(columns, cardInColumnDTOList));
+    }
+
+    return responseBoardDTOList;
+  }
+
+
   private UserBoard findUserBoard(Long userId, Long boardId, String adminCheck) {
     UserBoard userBoard = userBoardRepository.findByUserIdAndBoardId(userId, boardId);
 
@@ -126,7 +159,6 @@ public class BoardService {
         new ApiException(NOT_FOUND_BOARD_EXCEPTION));
   }
 
-
   public boolean isUserInvited(Long boardId, Long userId) {
     Optional<Board> boardOptional = boardRepository.findById(boardId);
     Optional<User> userOptional = userRepository.findById(userId);
@@ -138,4 +170,5 @@ public class BoardService {
     }
     return false;
   }
+
 }

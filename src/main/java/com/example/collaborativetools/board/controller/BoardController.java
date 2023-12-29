@@ -4,6 +4,7 @@ import static com.example.collaborativetools.global.constant.ResponseCode.*;
 
 import com.example.collaborativetools.board.dto.CreateBoardDTO;
 import com.example.collaborativetools.board.dto.CreateBoardDTO.Response;
+import com.example.collaborativetools.board.dto.GetDetailResponseBoardDTO;
 import com.example.collaborativetools.board.dto.GetMemberResponseBoardDTO;
 import com.example.collaborativetools.board.dto.GetResponseBoardDTO;
 import com.example.collaborativetools.board.dto.InviteRequestBoardDTO;
@@ -113,5 +114,17 @@ public class BoardController {
 
   }
 
+  // 보드 상세 조회
+  @GetMapping("/{boardId}")
+  public ResponseEntity<BaseResponse<List<GetDetailResponseBoardDTO>>> getBoardId(
+      @PathVariable Long boardId,
+      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+    List<GetDetailResponseBoardDTO> ResponseDTO = boardService.getBoardId(boardId,
+        userDetails.getUser().getId());
+
+    return ResponseEntity.status(HttpStatus.OK).body(
+        BaseResponse.of(GET_DETAIL_BOARD, ResponseDTO));
+  }
 
 }
