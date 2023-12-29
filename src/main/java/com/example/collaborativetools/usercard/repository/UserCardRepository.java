@@ -6,5 +6,5 @@ import com.example.collaborativetools.usercard.entity.UserCard;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserCardRepository extends JpaRepository<UserCard, Long> {
-    UserCard findByCardAndUser(Card card, User user);
+    boolean existsByCardAndUser(Card card, User user);
 }

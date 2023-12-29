@@ -28,4 +28,8 @@ public class UserCard {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    public UserCard(User user, Card card) {
+        this.user = user;
+        this.card = card;
+    }
 }
