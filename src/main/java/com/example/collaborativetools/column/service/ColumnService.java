@@ -2,6 +2,10 @@ package com.example.collaborativetools.column.service;
 
 import static com.example.collaborativetools.global.constant.ErrorCode.*;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,5 +65,13 @@ public class ColumnService {
 		// TODO: 12/27/23 로그인 유저정보로 UserBoard에 해당 유저 존재하는지 검증 구현 필요
 
 		columnRepository.delete(column);
+	}
+
+	public Set<ColumnResponse> getColumns(Sort sort, User loginUser) {
+		// TODO: 12/27/23 로그인 유저정보로 UserBoard에 해당 유저 존재하는지 검증 구현 필요
+
+		return columnRepository.findAll(sort).stream()
+			.map(ColumnResponse::from)
+			.collect(Collectors.toUnmodifiableSet());
 	}
 }
