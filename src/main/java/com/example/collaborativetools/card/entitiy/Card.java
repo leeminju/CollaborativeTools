@@ -45,14 +45,14 @@ public class Card extends Timestamped {
     @JsonIgnore
     private Columns column;
 
-    @OneToMany(mappedBy = "card")
+    @OneToMany(mappedBy = "card",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;
 
-    @OneToMany(mappedBy = "card")
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<UserCard> userCardList;
 
-    public Card(CardRequestDto cardRequestDto, Columns columns) {
+    public Card(CardRequestDto cardRequestDto) {
         this.title = cardRequestDto.getTitle();
     }
 
