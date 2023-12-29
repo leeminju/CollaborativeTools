@@ -166,6 +166,12 @@ public class BoardService {
         new ApiException(NOT_FOUND_USER_EXCEPTION));
   }
 
+
+  private Board findBoard(Long boardId) {
+    return boardRepository.findById(boardId).orElseThrow(() ->
+        new ApiException(NOT_FOUND_BOARD_EXCEPTION));
+  }
+
   public boolean isUserInvited(Long boardId, Long userId) {
     Optional<Board> boardOptional = boardRepository.findById(boardId);
     Optional<User> userOptional = userRepository.findById(userId);
@@ -177,6 +183,7 @@ public class BoardService {
     }
     return false;
   }
+
 
 
 }

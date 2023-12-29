@@ -3,7 +3,9 @@ var userId = -1;
 // 화면 시작하자마자
 $(document).ready(function () {
     authorizationCheck();//인가
+    getBoardList();
 })
+
 
 // 인가 : 토큰 유효성 판단
 function authorizationCheck() {
@@ -25,34 +27,35 @@ function authorizationCheck() {
         type: 'GET',
         url: `/api/users`,
         contentType: 'application/json',
-    })
-        .done(function (res, status, xhr) {
-            const username = res;
-
-            if (!username) {
-                window.location.href = '/login';
-                return;
+        success: function (response) {
+            if (!response['data']) {
+                CookieRemove();
             }
-            userId = Number(res['data']['id']);
-            $('#username').text(res['data']['username']);
-        })
-        .fail(function (jqXHR, textStatus) {
-            logout();
-        });
+            userId = Number(response['data']['id']);
+            $('#username').text(response['data']['username']);
+        },
+        error(error, status, request) {
+            console.log(error);
+            CookieRemove();
+        }
+    });
+}
+
+function CookieRemove() {
+    Cookies.remove('Authorization', {path: '/'});
+    Cookies.remove('RefreshToken', {path: '/'});
+    window.location.href = host + '/login';
 }
 
 function logout() {
     // 토큰 삭제
+
     $.ajax({
             type: 'DELETE',
             url: `/api/users/logout`,
             success: function (response) {
-                Cookies.remove('Authorization', {path: '/'});
-                Cookies.remove('RefreshToken', {path: '/'});
-
-                console.log(response);
                 alert(response['msg']);
-                window.location.href = host + '/login';
+                CookieRemove();
             },
             error(error, status, request) {
                 console.log(error);
@@ -134,4 +137,208 @@ function unRegister() {
             }
         }
     );
+}
+
+function getBoardList() {
+    $.ajax({
+            type: 'GET',
+            url: `/api/boards`,
+            success: function (response) {
+                for (var i = 0; i < response['data'].length; i++) {
+                    let board = response['data'][i];
+                    console.log(board);
+
+                    let boardId = board['boardId'];
+                    let title = board['title'];
+                    let desc = board['desc'];
+                    let backgroundColor = board['backgroundColor'];
+
+
+                    let tempHtml = `<li class="list-group-item" style="border: black solid 1px;background-color: ${backgroundColor}"
+                        onclick = "showBoardDetails('${boardId}','${title}','${desc}','${backgroundColor}')">${title}
+                    <button onclick="updateBoardId('${boardId}','${title}','${desc}','${backgroundColor}')" data-bs-toggle="modal" data-bs-target="#updateBoard" style="float: right" class="btn btn-outline-dark">edit</button>
+                    <button onclick="removeBoard(${boardId})" style="float: right" class="btn btn-outline-dark">remove</button></li>`;
+
+                    $('#board_list').append(tempHtml);
+                    if (i == 0) {
+                        showBoardDetails(boardId, title, desc, backgroundColor);
+                    }
+
+                }
+
+                let button = `<button data-bs-toggle="modal"
+                                                data-bs-target="#createBoard">게시판 추가</button>`
+                $('#board_list').append(button);
+            },
+            error(error, status, request) {
+                alert(error['responseJSON']['msg']);
+            }
+        }
+    );
+}
+
+function removeBoard(boardId) {
+    $.ajax({
+            type: 'DELETE',
+            url: `/api/boards/${boardId}`,
+            success: function (response) {
+                alert(response['msg']);
+                win_reload();
+            },
+            error(error, status, request) {
+                alert(error['msg']);
+            }
+        }
+    );
+}
+
+function showBoardDetails(boardId, title, desc, backgroundColor) {
+    $('#board_title').text(title);
+    $('#board_desc').text(desc);
+    $('#board_background').css("background-color", backgroundColor);
+    $('#invite_btn').val(boardId);
+    //상세 조회 - 컬럼 붙이기
+}
+
+function createBoard() {
+    let title = $('#create_board_title').val();
+    let desc = $('#create_board_desc').val();
+    let backgroundColor = $('#create_background_color').val();
+
+    let data =
+        {
+            'title': title,
+            'desc': desc,
+            'backgroundColor': backgroundColor
+        };
+
+    $.ajax({
+            type: 'POST',
+            url: '/api/boards',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function (response) {
+                alert(response['msg']);
+                win_reload();
+            },
+            error(error, status, request) {
+                console.log(error);
+
+                if (error['responseJSON']['data'] != null) {
+                    let valid = error['responseJSON']['data'];
+                    let str = "";
+
+                    if (valid['desc']) {
+                        str += valid['desc'] + "\n";
+                    }
+
+                    if (valid['title']) {
+                        str += valid['title'] + "\n";
+                    }
+                    alert(str);
+                } else {
+                    alert(error['responseJSON']['msg']);
+                }
+            }
+        }
+    );
+}
+
+function updateBoardId(boardId, title, desc, backgroundColor) {
+    $('#board_update_btn').val(boardId);
+    $('#update_board_title').val(title);
+    $('#update_board_desc').val(desc);
+    $('#update_background_color').val(backgroundColor);
+}
+
+function updateBoard() {
+    let boardId = $('#board_update_btn').val();
+    let title = $('#update_board_title').val();
+    let desc = $('#update_board_desc').val();
+    let backgroundColor = $('#update_background_color').val();
+
+    let data =
+        {
+            'title': title,
+            'desc': desc,
+            'backgroundColor': backgroundColor
+        };
+
+    $.ajax({
+            type: 'PUT',
+            url: `/api/boards/${boardId}`,
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function (response) {
+                alert(response['msg']);
+                win_reload();
+            },
+            error(error, status, request) {
+                console.log(error);
+
+                if (error['responseJSON']['data'] != null) {
+                    let valid = error['responseJSON']['data'];
+                    let str = "";
+
+                    if (valid['desc']) {
+                        str += valid['desc'] + "\n";
+                    }
+
+                    if (valid['title']) {
+                        str += valid['title'] + "\n";
+                    }
+                    alert(str);
+                } else {
+                    alert(error['responseJSON']['msg']);
+                }
+            }
+        }
+    );
+}
+
+function getBoardMember() {
+    let boardId = $('#invite_btn').val();
+
+    $.ajax({
+        type: 'GET',
+        url: `/api/boards/${boardId}/users`,
+        contentType: 'application/json',
+        success: function (response) {
+            let members = response['data'];
+            $('#board_member_list').empty();
+            for (var i = 0; i < members.length; i++) {
+                let member = members[i];
+                let username = member['userName'];
+                let temp = `<li class="list-group-item" style="border: black solid 1px" >${username}
+                    <button onclick="" style="float: right" class="btn btn-outline-dark">삭제</button></li>`;
+                $('#board_member_list').append(temp);
+            }
+        },
+        error(error, status, request) {
+
+        }
+    });
+}
+
+function inviteMember() {
+    let boardId = $('#invite_btn').val();
+    let username = $('#invite_member_name').val();
+
+    let data = {
+        'username': username
+    }
+
+    $.ajax({
+        type: 'POST',
+        url: `/api/boards/${boardId}/users`,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function (response) {
+            alert(response["msg"]);
+            getBoardMember();
+        },
+        error(error, status, request) {
+            alert(error['responseJSON']["msg"]);
+        }
+    });
 }

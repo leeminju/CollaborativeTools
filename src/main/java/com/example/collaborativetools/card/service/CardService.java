@@ -40,7 +40,7 @@ public class CardService {
         Columns columns = columnsRepository.findById(columnId).orElseThrow(() -> new NullPointerException("존재하지 않는 컬럼입니다"));
 
         //보드 유저 확인
-        validateUserInvitation(columns.getBoard().getId(), user.getId());
+//        validateUserInvitation(columns.getBoard().getId(), user.getId());
 
         Integer lastSequence = cardRepository.findLastSequenceInColumn(columns.getId());
         if (lastSequence == null) lastSequence = 0;
@@ -145,10 +145,10 @@ public class CardService {
         return BaseResponse.of("카드 순서를 변경하였습니다", HttpStatus.OK.value(), card);
     }
 
-    private void validateUserInvitation(Long boardId, Long userId) {
-        boolean isUserInvited = boardService.isUserInvited(boardId, userId);
-        if (!isUserInvited) {
-            throw new SecurityException("보드에 초대되지 않은 사용자는 카드에 접근할 수 없습니다.");
-        }
-    }
+//    private void validateUserInvitation(Long boardId, Long userId) {
+//        boolean isUserInvited = boardService.isUserInvited(boardId, userId);
+//        if (!isUserInvited) {
+//            throw new SecurityException("보드에 초대되지 않은 사용자는 카드에 접근할 수 없습니다.");
+//        }
+//    }
 }
