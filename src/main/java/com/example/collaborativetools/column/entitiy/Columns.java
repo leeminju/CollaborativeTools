@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.example.collaborativetools.board.entitiy.Board;
 import com.example.collaborativetools.card.entitiy.Card;
+import com.example.collaborativetools.column.dto.request.ColumnUpdateRequest;
 import com.example.collaborativetools.global.entity.Timestamped;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -18,6 +19,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,10 +49,11 @@ public class Columns extends Timestamped {
         cascade = CascadeType.REMOVE,
         orphanRemoval = true
     )
+    @OrderBy("sequence asc")
     @JsonIgnore
     private Set<Card> cards = new LinkedHashSet<>();
 
-    public Columns(String title, Integer sequence, Board board) {
+    private Columns(String title, Integer sequence, Board board) {
         this.title = title;
         this.sequence = sequence;
         this.board = board;
@@ -60,10 +63,8 @@ public class Columns extends Timestamped {
         return new Columns(title, sequence, board);
     }
 
-    public void update(String title, Integer sequence, Board board) {
-        this.title = title;
-        this.sequence = sequence;
-        this.board = board;
-
+    public void update(ColumnUpdateRequest request) {
+        this.title = request.getTitle();
+        this.sequence = request.getSequence();
     }
 }
