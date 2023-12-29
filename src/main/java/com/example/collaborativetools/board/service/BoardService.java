@@ -23,6 +23,7 @@ import com.example.collaborativetools.userboard.entity.UserBoard;
 import com.example.collaborativetools.userboard.repository.UserBoardRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +35,7 @@ public class BoardService {
   private final BoardRepository boardRepository;
   private final UserRepository userRepository;
   private final UserBoardRepository userBoardRepository;
-  private final ColumnRepository columnRepository;
+
 
   public CreateBoardDTO.Response createBoard(CreateBoardDTO.Request request, Long userId) {
     User user = findUser(userId);
@@ -108,6 +109,7 @@ public class BoardService {
         .map(userBoard -> GetMemberResponseBoardDTO.of(userBoard.getUser())).toList();
   }
 
+
   public List<GetDetailResponseBoardDTO> getBoardId(Long boardId, Long userId) {
     UserBoard userBoard = findUserBoard(userId, boardId, "No");
 
@@ -134,6 +136,16 @@ public class BoardService {
     return responseBoardDTOList;
   }
 
+  public void deleteMemberToBoard(Long boardId, Long userId) {
+    UserBoard userBoard = findUserBoard(userId, boardId, "No");
+
+    if(userBoard.getRole().equals(UserRoleEnum.ADMIN)){
+      throw new ApiException(NO_BOARD_AUTHORITY_EXCEPTION);
+    }
+
+    userBoardRepository.deleteById(userBoard.getId());
+  }
+
 
   private UserBoard findUserBoard(Long userId, Long boardId, String adminCheck) {
     UserBoard userBoard = userBoardRepository.findByUserIdAndBoardId(userId, boardId);
@@ -154,21 +166,24 @@ public class BoardService {
         new ApiException(NOT_FOUND_USER_EXCEPTION));
   }
 
+
   private Board findBoard(Long boardId) {
     return boardRepository.findById(boardId).orElseThrow(() ->
         new ApiException(NOT_FOUND_BOARD_EXCEPTION));
   }
 
-//  public boolean isUserInvited(Long boardId, Long userId) {
-//    Optional<Board> boardOptional = boardRepository.findById(boardId);
-//    Optional<User> userOptional = userRepository.findById(userId);
-//
-//    if (boardOptional.isPresent() && userOptional.isPresent()) {
-//      Board board = boardOptional.get();
-//
-//      return board.getUserBoardList().stream().anyMatch(userBoard -> userBoard.getUser().getId().equals(userId));
-//    }
-//    return false;
-//  }
+  public boolean isUserInvited(Long boardId, Long userId) {
+    Optional<Board> boardOptional = boardRepository.findById(boardId);
+    Optional<User> userOptional = userRepository.findById(userId);
+
+    if (boardOptional.isPresent() && userOptional.isPresent()) {
+      Board board = boardOptional.get();
+
+      return board.getUserBoardList().stream().anyMatch(userBoard -> userBoard.getUser().getId().equals(userId));
+    }
+    return false;
+  }
+
+
 
 }
