@@ -2,10 +2,8 @@ package com.example.collaborativetools.column.controller;
 
 import static com.example.collaborativetools.global.constant.ResponseCode.*;
 
-import java.util.Set;
+import java.util.List;
 
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.SortDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -53,12 +51,8 @@ public class ColumnApiController {
 
 	//컬럼리스트 + 카드포함 조회
 	@GetMapping
-	public ResponseEntity<BaseResponse<Set<ColumnResponse>>> getColumns(
-		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@SortDefault(sort = "sequence", direction = Sort.Direction.ASC) Sort sort
-	) {
-		User user = userDetails.getUser();
-		Set<ColumnResponse> response = columnService.getColumns(sort, user);
+	public ResponseEntity<BaseResponse<List<ColumnResponse>>> getColumns() {
+		List<ColumnResponse> response = columnService.getColumns();
 		return ResponseEntity.status(GET_COLUMNS.getHttpStatus())
 			.body(
 				BaseResponse.of(
@@ -88,12 +82,8 @@ public class ColumnApiController {
 
 	//컬럼삭제
 	@DeleteMapping("/{columnId}")
-	public ResponseEntity<BaseResponse<Void>> deleteColumn(
-		@PathVariable Long columnId,
-		@AuthenticationPrincipal UserDetailsImpl userDetails
-	) {
-		User user = userDetails.getUser();
-		columnService.deleteColumn(columnId, user);
+	public ResponseEntity<BaseResponse<Void>> deleteColumn(@PathVariable Long columnId) {
+		columnService.deleteColumn(columnId);
 
 		return ResponseEntity.status(DELETED_COLUMNS.getHttpStatus())
 			.body(
