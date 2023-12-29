@@ -7,5 +7,5 @@ import com.example.collaborativetools.column.entitiy.Columns;
 
 public interface ColumnRepository extends JpaRepository<Columns, Long> {
 
-  List<Columns> findColumnsByBoardId(Long boardId);
+
 }
