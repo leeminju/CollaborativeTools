@@ -20,26 +20,26 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserBoard {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "board_id")
-  private Board board;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "board_id")
+    private Board board;
 
-  @ManyToOne
-  @JoinColumn(name = "user_id")
-  private User user;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
-  @Enumerated(EnumType.STRING)
-  private UserRoleEnum role;
+    @Enumerated(EnumType.STRING)
+    private UserRoleEnum role;
 
-  public static UserBoard createUserBoard(Board board, User user,UserRoleEnum role) {
-    return UserBoard.builder()
-        .board(board)
-        .user(user)
-        .role(role)
-        .build();
-  }
+    public static UserBoard createUserBoard(Board board, User user, UserRoleEnum role) {
+        return UserBoard.builder()
+                .board(board)
+                .user(user)
+                .role(role)
+                .build();
+    }
 }

@@ -4,6 +4,7 @@ package com.example.collaborativetools.global.config;
 import com.example.collaborativetools.global.jwt.JwtAuthorizationFilter;
 import com.example.collaborativetools.global.jwt.JwtUtil;
 import com.example.collaborativetools.global.jwt.UserDetailsServiceImpl;
+import com.example.collaborativetools.redis.dao.RedisDao;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -30,6 +31,7 @@ public class WebSecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final ObjectMapper objectMapper;
+    private final RedisDao redisDao;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -43,7 +45,7 @@ public class WebSecurityConfig {
 
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return new JwtAuthorizationFilter(jwtUtil, userDetailsService, objectMapper);
+        return new JwtAuthorizationFilter(jwtUtil, userDetailsService, redisDao, objectMapper);
     }
 
     @Bean
@@ -59,6 +61,7 @@ public class WebSecurityConfig {
         http.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // resources 접근 허용 설정
+                        .requestMatchers("/redis").permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/signup").permitAll()
                         .requestMatchers("/").permitAll()
