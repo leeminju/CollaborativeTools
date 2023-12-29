@@ -114,6 +114,7 @@ public class BoardController {
 
   }
 
+
   // 보드 상세 조회
   @GetMapping("/{boardId}")
   public ResponseEntity<BaseResponse<List<GetDetailResponseBoardDTO>>> getBoardId(
@@ -126,5 +127,23 @@ public class BoardController {
     return ResponseEntity.status(HttpStatus.OK).body(
         BaseResponse.of(GET_DETAIL_BOARD, ResponseDTO));
   }
+
+  //보드 멤버 탈퇴
+  @DeleteMapping("/{boardId}/users")
+  public ResponseEntity<BaseResponse<String>> deleteMemberToBoard(
+      @PathVariable Long boardId,
+      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+    Long userId = userDetails.getUser().getId();
+
+    boardService.deleteMemberToBoard(boardId,userId);
+
+
+    return ResponseEntity.status(HttpStatus.OK).body(
+        BaseResponse.of(DELETE_MEMBER_BOARD,
+            String.format("%d번 보드 %d번 유저 탈퇴 완료", boardId, userId)));
+  }
+
+
 
 }
