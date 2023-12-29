@@ -1,11 +1,13 @@
 package com.example.collaborativetools.card.Dto;
 
 import com.example.collaborativetools.card.entitiy.Card;
+import com.example.collaborativetools.user.dto.UserInfoDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -21,6 +23,7 @@ public class CardResponseDto {
     private final LocalDateTime dueDate;
     private final LocalDateTime createdAt;
     private final LocalDateTime modifiedAt;
+    private final List<UserInfoDto>members;
 //    private List<CommentResponseDto> comments;
 
     public CardResponseDto(Card card) {
@@ -31,6 +34,9 @@ public class CardResponseDto {
         this.dueDate = card.getDueDate();
         this.createdAt = card.getCreatedAt();
         this.modifiedAt = card.getModifiedAt();
+        this.members = card.getUserCardList().stream()
+                .map(userCard -> new UserInfoDto(userCard.getUser()))
+                .collect(Collectors.toList());
 //        this.comments = card.getComments().stream()
 //                .map(CommentResponseDto::new)
 //                .collect(Collectors.toList());

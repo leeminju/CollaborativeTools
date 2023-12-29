@@ -34,7 +34,7 @@ public enum ResponseCode {
     SIGNUP(201, "회원가입 성공"),
     CREATED_BOARD(201, "게시판 생성 완료"),
     CREATED_COLUMNS(201, "컬럼 추가 완료"),
-    CREATED_LIKE(201, "카드 추가 완료"),
+    CREATED_CARD(201, "카드 추가 완료"),
     REISSUE_TOKEN(201, "토큰 재발급 완료"),
     CREATED_COMMENT(201, "댓글 추가 완료");
 
