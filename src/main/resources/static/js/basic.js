@@ -4,8 +4,107 @@ var userId = -1;
 $(document).ready(function () {
     authorizationCheck();//인가
     getBoardList();
-})
 
+})
+//드래깅 대상 생성
+const dragger = {
+    init(target, options) {
+        return dragula(
+            [
+                ...target // 해당 리스트의 아이템을 드래그 가능하게 만듦
+            ],
+            options
+        );
+    },
+    setSiblings({el, target, items, type}) {
+        // 계산에 사용할 앞과 뒤의 카드 선언
+        let prev = null;
+        let next = null;
+
+        console.log("itemlist");
+        console.log(items)
+        items.forEach((item, index, arr) => {
+            console.log("index ->" + index);
+            console.log(item)
+            // 리스트의 아이템들을 순환
+            if (item.dataset[type + "Id"] * 1 === el.dataset[type + "Id"] * 1) {
+                console.log("cardId" + item.dataset[type + "Id"])
+                // 현재 드래그하는 카드일 경우
+                prev = index > 0 ? arr[index - 1] : null; // 맨 위가 아닐 경우 이전 아이템 할당
+                next = index < arr.length - 1 ? arr[index + 1] : null; // 맨 아래가 아닐 경우 다음 아이템 할당
+            }
+        });
+
+        return {prev, next};
+    }
+};
+
+function setCardDraggable() {
+    if (this.dragulaCard) this.dragulaCard.destroy();
+
+    const options = {};
+    let cardList = Array.from(document.querySelectorAll(".list-group"));
+     console.log(cardList)
+    this.dragulaCard = dragger.init(
+        Array.from(document.querySelectorAll(".list-group")),
+        options
+    );
+
+    this.dragulaCard.on("drop", (el, target, source, sibling) => {
+        // 이벤트 리스너 등록(el은 드래그하는 요소, target은 위에서 등록한 리스트)
+        console.log("el")
+        console.log(sibling)
+        const targetCard = {
+            id: el.dataset.cardId * 1,
+            columnId: target.parentNode.dataset.columnId * 1,
+            sequence: el.dataset.sequence * 1
+        }; // api업데이트시 쓰일 객체 생성
+
+        const {prev, next} = dragger.setSiblings({
+            el,
+            target,
+            items: target.querySelectorAll(".list-group-item"),
+            type: "card"
+        });
+
+        // 자리가 맨 위일 경우
+        console.log("prev");
+        console.log(prev);
+        console.log("next");
+        console.log(next)
+        if (!prev && next) targetCard.sequence = 1;
+        // 자리가 사이일 경우
+        else if (prev && next) {
+            let temp = targetCard.sequence;
+            console.log("silbing")
+            console.log(sibling)
+            targetCard.sequence = (next.dataset.sequence * 1);
+            //sibling.sequence = temp;
+        }
+        // 자리가 맨 아래일 경우
+        else if (prev && !next) targetCard.sequence = (prev.dataset.sequence * 1) + 1;
+
+        this.updateCard(targetCard);
+    });
+}
+
+function updateCard(card) {
+    console.log("uypdate card")
+    $.ajax({
+        type: 'PUT',
+        url: `/api/cards/changesequence/${card.id}`,
+        contentType: 'application/json',
+        data: JSON.stringify(card),
+        success: function (response) {
+            console.log(response);
+            alert(response['msg']);
+            win_reload();
+        },
+        error(error, status, request) {
+            alert(card)
+        }
+    });
+}
 
 // 인가 : 토큰 유효성 판단
 function authorizationCheck() {
@@ -190,11 +289,12 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
                 let columnId = column['columnId'];
                 let title = column['columnTitle'];
                 let cards = column['cardTitleList'];
-
-                let html = `<div class="card text-dark bg-light mb-3" style="height:fit-content; max-width:18rem; width: 18rem; margin: 10px">
+                let sequence = column['sequence'];
+                let html = `<div class="card text-dark bg-light mb-3" style="height:fit-content; max-width:18rem; width: 18rem; margin: 10px" xmlns="http://www.w3.org/1999/html">
                                         <div class="card-header">${title}</div>
-                                          <div class="card-body">
+                                          <div class="card-body" data-column-id="${columnId}" data-sequence="${sequence}">
                                                 <ul class="list-group list-group-flush" id="card_list-${columnId}">
+                                                <br></br>
                                                  </ul>
                                                 <button id="add_card_btn-${columnId}" onclick="showCardTitleArea(${columnId})" style="width:100%;border: transparent;background-color: transparent">+ Add a card</button>
                                                      
@@ -212,8 +312,13 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
                     let cardId = card['cardId'];
                     let cardTitle = card['cardTitle'];
                     let backgroundColor = card['backgroundColor'];
+                    let sequence = card['sequence'];
+                    let html = `<li class="list-group-item" style="background-color: ${backgroundColor};border: grey solid 1px; border-radius: 10px;margin-bottom: 8px" data-card-id="${cardId}" data-sequence=${sequence}>
+                            ${cardTitle}
+                        </li>`;
 
-                    let html = `<li class="list-group-item" style="background-color: ${backgroundColor};border: grey solid 1px; border-radius: 10px;margin-bottom: 8px">${cardTitle}</li>`;
+                   console.log($("#card_list-" + columnId).children('br').remove())
+
                     $("#card_list-" + columnId).append(html);
                 }
 
@@ -231,10 +336,13 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
                                         </div>`
             $('#column_list').append(html);
 
+            setCardDraggable();
         }, error(error, status, request) {
             alert(error['msg']);
         }
     });
+
+
 }
 
 //리스트 추가 시 제목 입력 보이게

@@ -1,6 +1,6 @@
 package com.example.collaborativetools.card.controller;
 
-import com.example.collaborativetools.card.Dto.*;
+import com.example.collaborativetools.card.dto.*;
 import com.example.collaborativetools.card.entitiy.Card;
 import com.example.collaborativetools.card.service.CardService;
 import com.example.collaborativetools.global.dto.BaseResponse;

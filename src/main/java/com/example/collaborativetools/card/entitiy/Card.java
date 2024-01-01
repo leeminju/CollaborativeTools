@@ -1,7 +1,7 @@
 package com.example.collaborativetools.card.entitiy;
 
-import com.example.collaborativetools.card.Dto.CardRequestDto;
-import com.example.collaborativetools.card.Dto.CardUpdateRequestDto;
+import com.example.collaborativetools.card.dto.CardRequestDto;
+import com.example.collaborativetools.card.dto.CardUpdateRequestDto;
 import com.example.collaborativetools.column.entitiy.Columns;
 import com.example.collaborativetools.comment.entitiy.Comment;
 import com.example.collaborativetools.global.entity.Timestamped;
@@ -47,6 +47,7 @@ public class Card extends Timestamped {
 
     @OneToMany(mappedBy = "card",cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("createdAt DESC")
+    @JsonIgnore
     private List<Comment> comments;
 
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)

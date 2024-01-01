@@ -13,5 +13,10 @@ public interface CardRepository extends JpaRepository<Card, Long> {
     @Query("SELECT MAX(c.sequence) FROM Card c WHERE c.column.id =:columnId")
     Integer findLastSequenceInColumn(@Param("columnId") Long columnId);
 
-    List<Card> findBySequenceBetweenOrderBySequence(int start, int end);
+    List<Card> findByColumnIdAndSequenceBetweenOrderBySequence(long columnId, int start, int end);
+
+    List<Card> findByColumnId(long currentColumnId);
+
+    int countByColumnId(Long columnId);
+
 }
