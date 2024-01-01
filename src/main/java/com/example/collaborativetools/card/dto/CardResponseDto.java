@@ -1,10 +1,10 @@
-package com.example.collaborativetools.card.Dto;
+package com.example.collaborativetools.card.dto;
 
 import com.example.collaborativetools.card.entitiy.Card;
 import com.example.collaborativetools.comment.dto.response.CommentResponse;
 import com.example.collaborativetools.user.dto.UserInfoDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Builder;
+
 import lombok.Getter;
 
 import java.time.LocalDateTime;
