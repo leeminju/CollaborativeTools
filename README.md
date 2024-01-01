@@ -35,13 +35,15 @@
 ![img.png](img.png)
 ---
 ## 🍄 API 명세
-https://documenter.getpostman.com/view/30861162/2s9YsDkvB6#afcf5dae-26e3-48d2-9265-c4f831c6ea2c
+https://documenter.getpostman.com/view/30861162/2s9YsDkvB6
 
 ---
 ## 🍄 기능 구현
 - **사용자 관리 기능**
     - [x]  로그인 / 회원가입 기능
-    - [x]  사용자 정보 수정 및 삭제 기능
+    - [x]  사용자 정보 수정(비밀번호 변경) 및 삭제 기능(회원 탈퇴)
+
+
 - **보드 관리 기능**
     - [x]  보드 생성
     - [x]  보드 수정
@@ -52,6 +54,9 @@ https://documenter.getpostman.com/view/30861162/2s9YsDkvB6#afcf5dae-26e3-48d2-92
         - 생성한 사용자만 삭제를 할 수 있습니다.
     - [x]  보드 초대
         - 특정 사용자들을 해당 보드에 초대시켜 협업을 할 수 있어야 합니다.
+    - [x] 보드 상세 조회
+
+
 - **컬럼 관리 기능**
     - [x]  컬럼 생성
         - 보드 내부에 컬럼을 생성할 수 있어야 합니다.
@@ -71,7 +76,6 @@ https://documenter.getpostman.com/view/30861162/2s9YsDkvB6#afcf5dae-26e3-48d2-92
         - 카드 설명
         - 카드 색상
         - 작업자 할당
-        - 작업자 변경
     - [x]  카드 삭제
     - [x]  카드 이동
         - 같은 컬럼 내에서 카드의 위치를 변경할 수 있어야 합니다.
