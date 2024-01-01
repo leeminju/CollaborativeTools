@@ -1,10 +1,51 @@
 const host = 'http://' + window.location.host;
 var userId = -1;
+let current_boardId = 0;
+let prev_columnId = -1;
+let prev_sequence = -1;
 // 화면 시작하자마자
 $(document).ready(function () {
+
     authorizationCheck();//인가
     getBoardList();
+
+
 })
+
+$('html').click(function (e) {
+    if (prev_columnId !== -1) {
+        let targetId = e.target.id;
+        if (targetId !== `colum_title-${prev_columnId}` && targetId !== `column_title_input-${prev_columnId}`) {
+            updateColumn(prev_columnId);
+        }
+    }
+});
+
+function updateColumn(prev_columnId) {
+    let title = $(`#column_title_input-${prev_columnId}`).val();
+    let data = {
+        'boardId': current_boardId,
+        'title': title,
+        'sequence': prev_sequence
+
+    }
+    $.ajax({
+        type: 'PUT',
+        url: `/api/columns/${prev_columnId}`,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function (response) {
+            $('#colum_title-' + prev_columnId).text(title);
+            $('#colum_title-' + prev_columnId).show();
+            $('#colum_title-' + prev_columnId).show();
+            $('#column_title_input-' + prev_columnId).hide();
+            prev_columnId = -1;
+        },
+        error(error, status, request) {
+            console.log(error);
+        }
+    });
+}
 
 
 // 인가 : 토큰 유효성 판단
@@ -31,7 +72,6 @@ function authorizationCheck() {
             userId = Number(response['data']['id']);
             $('#username').text(response['data']['username']);
         }, error(error, status, request) {
-            console.log(error);
             CookieRemove();
         }
     });
@@ -90,7 +130,6 @@ function updatePassword() {
         contentType: 'application/json',
         data: JSON.stringify(data),
         success: function (response) {
-            console.log(response);
             alert(response['msg']);
             win_reload();
         },
@@ -129,7 +168,6 @@ function getBoardList() {
         type: 'GET', url: `/api/boards`, success: function (response) {
             for (var i = 0; i < response['data'].length; i++) {
                 let board = response['data'][i];
-                console.log(board);
 
                 let boardId = board['boardId'];
                 let title = board['title'];
@@ -141,11 +179,13 @@ function getBoardList() {
 
                 let tempHtml = `<li class="list-group-item" style="border: black solid 1px;background-color: ${backgroundColor}"
                         onclick = "showBoardDetails('${boardId}','${title}','${desc2}','${backgroundColor}')">${title}
-                    <button onclick="updateBoardModal('${boardId}','${title}','${desc2}','${backgroundColor}')" data-bs-toggle="modal" data-bs-target="#updateBoard" style="float: right" class="btn btn-outline-dark">edit</button>
-                    <button onclick="removeBoard(${boardId})" style="float: right" class="btn btn-outline-dark">remove</button></li>`;
+                    <div style="float:right;display: inline-block; ">     
+                    <button onclick="updateBoardModal('${boardId}','${title}','${desc2}','${backgroundColor}')" data-bs-toggle="modal" data-bs-target="#updateBoard" class="btn btn-outline-dark">edit</button>
+                    <button onclick="removeBoard(${boardId})" class="btn btn-outline-dark">remove</button></div></li>`;
 
                 $('#board_list').append(tempHtml);
                 if (i == 0) {
+                    current_boardId = boardId;
                     showBoardDetails(boardId, title, desc1, backgroundColor);
                 }
 
@@ -171,9 +211,24 @@ function removeBoard(boardId) {
     });
 }
 
+function showEditTitle(columnId, sequence) {
+    if (prev_columnId !== -1 && prev_columnId !== columnId) {
+        // $('#colum_title-' + prev_columnId).show();
+        // $('#column_title_input-' + prev_columnId).hide();
+         updateColumn(prev_columnId);
+    }
+
+    $('#colum_title-' + columnId).hide();
+    $('#column_title_input-' + columnId).show();
+    prev_columnId = columnId;
+    prev_sequence = sequence;
+}
+
+
 // 보드 상세 조회
 function showBoardDetails(boardId, title, desc, backgroundColor) {
-
+    current_boardId = boardId;
+    prev_columnId=-1;
     $('#board_title').text(title);
     $('#board_desc').text(desc);
     $('#board_background').css("background-color", backgroundColor);
@@ -190,10 +245,23 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
                 let column = columns[i];
                 let columnId = column['columnId'];
                 let title = column['columnTitle'];
+                let sequence = column['sequence'];
+
                 let cards = column['cardTitleList'];
                 last_sequence = column['sequence'];
                 let html = `<div class="card text-dark bg-light mb-3" style="height:fit-content; max-width:18rem; width: 18rem; margin: 10px">
-                                        <div class="card-header">${title}</div>
+                                        <div class="card-header">
+                                        <span onclick="showEditTitle('${columnId}','${sequence}')" id="colum_title-${columnId}">${title}</span>
+                                        <input class = "column_title_input" style="display: none;width: 75%" value="${title}" id="column_title_input-${columnId}">
+                                         <div class="btn-group" style="float: right">
+  <button type="button" class="btn dropdown"  style="background-color: transparent;border:transparent;" data-bs-toggle="dropdown" aria-expanded="false">
+    • • • 
+  </button>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" onclick="removeColumn('${columnId}')">Remove</a></li>
+    </ul>
+                                            </div>
+                                         </div>
                                           <div class="card-body">
                                                 <ul class="list-group list-group-flush" id="card_list-${columnId}">
                                                  </ul>
@@ -294,7 +362,6 @@ function createBoard() {
             win_reload();
         },
         error(error, status, request) {
-            console.log(error);
 
             if (error['responseJSON']['data'] != null) {
                 let valid = error['responseJSON']['data'];
@@ -344,8 +411,6 @@ function updateBoard() {
             win_reload();
         },
         error(error, status, request) {
-            console.log(error);
-
             if (error['responseJSON']['data'] != null) {
                 let valid = error['responseJSON']['data'];
                 let str = "";
@@ -431,8 +496,6 @@ function addCard(columnId) {
             win_reload();
         },
         error(error, status, request) {
-            console.log(error);
-
             if (error['responseJSON']['data'] != null) {
                 let valid = error['responseJSON']['data'];
                 let str = "";
@@ -449,15 +512,12 @@ function addCard(columnId) {
 }
 
 function addColumn(boardId, last_sequence) {
-    console.log("컬럼 추가");
     let title = $('#column_title_input-' + boardId).val();
     let sequence = last_sequence + 1;
-    console.log(sequence);
+
 
     let data = {
-        'boardId': boardId,
-        'title': title,
-        'sequence': sequence
+        'boardId': boardId, 'title': title, 'sequence': sequence
     };
 
     $.ajax({
@@ -470,8 +530,6 @@ function addColumn(boardId, last_sequence) {
             win_reload();
         },
         error(error, status, request) {
-            console.log(error);
-
             if (error['responseJSON']['data'] != null) {
                 let valid = error['responseJSON']['data'];
                 let str = "";
@@ -483,6 +541,32 @@ function addColumn(boardId, last_sequence) {
             } else {
                 alert(error['responseJSON']['msg']);
             }
+        }
+    });
+}
+
+
+function removeColumn(columnId) {
+    $.ajax({
+        type: 'DELETE', url: `/api/columns/${columnId}`,
+        success: function (response) {
+            alert(response['msg']);
+            win_reload();
+        }, error(error, status, request) {
+            alert(error['responseJSON']['msg']);
+        }
+    });
+}
+
+function unRegisterInBoard(){
+
+    $.ajax({
+        type: 'DELETE', url: `/api/boards/${current_boardId}/users`,
+        success: function (response) {
+            alert(response['msg']);
+            win_reload();
+        }, error(error, status, request) {
+             alert(error['responseJSON']['msg']);
         }
     });
 }

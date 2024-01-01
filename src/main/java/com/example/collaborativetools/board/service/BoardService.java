@@ -147,7 +147,7 @@ public class BoardService {
         UserBoard userBoard = findUserBoard(userId, boardId, "No");
 
         if (userBoard.getRole().equals(UserRoleEnum.ADMIN)) {
-            throw new ApiException(NO_BOARD_AUTHORITY_EXCEPTION);
+            throw new ApiException(ADMIN_NOT_UNREGISTER_BOARD);
         }
 
         userBoardRepository.deleteById(userBoard.getId());

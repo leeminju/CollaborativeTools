@@ -4,5 +4,6 @@ import lombok.Getter;
 
 @Getter
 public class CardSequenceDto {
+    private Long columnId;
     private Integer sequence;
 }

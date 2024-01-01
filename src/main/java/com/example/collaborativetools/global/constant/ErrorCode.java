@@ -14,6 +14,7 @@ public enum ErrorCode {
     NOT_EQUALS_PASSWORD(400, "현재 비밀번호와 일치하지 않습니다."),
     EQUALS_CURRENT_PASSWORD(400, "새 비밀번호가 현재 비밀번호와 동일합니다."),
     NOT_LOGIN_USER(400, "찾는 유저가 로그인 유저와 다릅니다."),
+    ADMIN_NOT_UNREGISTER_BOARD(400, "관리자는 탈퇴할 수 없습니다."),
 
     /* 401 UNAUTHORIZED  :  인증 되지 않음 */
 
@@ -31,12 +32,12 @@ public enum ErrorCode {
     NOT_FOUND_BOARD(404, "존재하지 않는 게시판 입니다."),
     NOT_FOUND_COLUMN(404, "존재하지 않는 컬럼 입니다."),
     NOT_FOUND_CARD(404, "존재하지 않는 카드입니다."),
-    NOT_FOUND_COMMENT(404,"존재하지 않는 댓글입니다."),
+    NOT_FOUND_COMMENT(404, "존재하지 않는 댓글입니다."),
 
 
     /* 409 CONFLICT : Resource 중복 */
     IS_DUPLICATE_USERNAME(409, "중복된 username입니다."),
-    USER_ALREADY_JOINED_BOARD(409,"이미 보드에 참여중인 유저 입니다."),
+    USER_ALREADY_JOINED_BOARD(409, "이미 보드에 참여중인 유저 입니다."),
 
     /* 500 INTERNAL_SERVER_ERROR : 서버 에러 */
     INTERNAL_SERVER_ERROR(500, "내부 서버 에러입니다.");

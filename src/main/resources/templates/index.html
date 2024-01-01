@@ -187,10 +187,15 @@
     </div>
 
     <div class="board_right" id="board_background">
-        <div style="margin: 10px"><span id="board_title" style=" font-size: 20px"></span>
-            <button style="float: right" class="btn btn-outline-dark" data-bs-toggle="modal"
-                    data-bs-target="#inviteMember" onclick="getBoardMember()" id="invite_btn">invite
-            </button>
+        <div style="margin: 10px">
+            <span id="board_title" style=" font-size: 20px"></span>
+            <div style="float:right;display: inline-block; ">
+                <button class="btn btn-outline-dark" data-bs-toggle="modal"
+                        data-bs-target="#inviteMember" onclick="getBoardMember()" id="invite_btn">초대
+                </button>
+                <button class="btn btn-outline-dark" onclick="unRegisterInBoard()">탈퇴
+                </button>
+            </div>
         </div>
         <textarea style="background-color:transparent; margin: 20px auto 0px auto;width: 97%" rows="auto" type="text"
                   class="form-control" id="board_desc" disabled></textarea>
