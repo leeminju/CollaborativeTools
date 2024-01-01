@@ -166,7 +166,7 @@ function removeBoard(boardId) {
             alert(response['msg']);
             win_reload();
         }, error(error, status, request) {
-            alert(error['msg']);
+            alert(error['responseJSON']['msg']);
         }
     });
 }
@@ -183,14 +183,15 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
     $.ajax({
         type: 'GET', url: `/api/boards/${boardId}`, success: function (response) {
             let columns = response['data'];
+            let last_sequence = 0;
             $('#column_list').empty();
-            console.log(columns);
+
             for (var i = 0; i < columns.length; i++) {
                 let column = columns[i];
                 let columnId = column['columnId'];
                 let title = column['columnTitle'];
                 let cards = column['cardTitleList'];
-
+                last_sequence = column['sequence'];
                 let html = `<div class="card text-dark bg-light mb-3" style="height:fit-content; max-width:18rem; width: 18rem; margin: 10px">
                                         <div class="card-header">${title}</div>
                                           <div class="card-body">
@@ -222,9 +223,11 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
             let html = `<div class="card text-dark bg-light mb-3" style="height:fit-content; max-width:18rem; width: 18rem; margin: 10px">                                    
                                           <div class="card-body">
                                                <button id="add_list_btn-${boardId}"onclick="showColumnTitleArea('${boardId}')" style="width:100%;border: transparent;background-color: transparent">+ Add another list</button>
-                                               <input  id="column_title_input-${boardId}"style="display: none" placeholder="리스트 제목을 입력하세요" style="display:none;margin: 100%">      
+                                               <input  id="column_title_input-${boardId}" placeholder="리스트 제목을 입력하세요"
+                                                style="display:none;width: 100%"
+                                                >      
                                                <span>
-                                               <button id="add_list_btn2-${boardId}" style="display: none" class="btn btn-primary">Add list</button>
+                                               <button onclick="addColumn('${boardId}','${last_sequence}')" id="add_list_btn2-${boardId}" style="display: none" class="btn btn-primary">Add list</button>
                                                <button id="close_add_list_btn-${boardId}" style="background-color: transparent;display: none; border: transparent"  onclick="hideColumnTitleArea(${boardId})">X</button>
                                                </span>
                                             </div>
@@ -242,7 +245,7 @@ function showColumnTitleArea(boardId) {
     $('#add_list_btn-' + boardId).hide();
 
     $('#column_title_input-' + boardId).show();
-    $('#add-list_btn2-' + boardId).show();
+    $('#add_list_btn2-' + boardId).show();
     $('#close_add_list_btn-' + boardId).show();
 }
 
@@ -250,7 +253,7 @@ function hideColumnTitleArea(boardId) {
     $('#add_list_btn-' + boardId).show();
 
     $('#column_title_input-' + boardId).hide();
-    $('#add-list_btn2-' + boardId).hide();
+    $('#add_list_btn2-' + boardId).hide();
     $('#close_add_list_btn-' + boardId).hide();
 }
 
@@ -421,6 +424,45 @@ function addCard(columnId) {
     $.ajax({
         type: 'POST',
         url: `/api/${columnId}/cards`,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function (response) {
+            alert(response['msg']);
+            win_reload();
+        },
+        error(error, status, request) {
+            console.log(error);
+
+            if (error['responseJSON']['data'] != null) {
+                let valid = error['responseJSON']['data'];
+                let str = "";
+
+                if (valid['title']) {
+                    str += valid['title'] + "\n";
+                }
+                alert(str);
+            } else {
+                alert(error['responseJSON']['msg']);
+            }
+        }
+    });
+}
+
+function addColumn(boardId, last_sequence) {
+    console.log("컬럼 추가");
+    let title = $('#column_title_input-' + boardId).val();
+    let sequence = last_sequence + 1;
+    console.log(sequence);
+
+    let data = {
+        'boardId': boardId,
+        'title': title,
+        'sequence': sequence
+    };
+
+    $.ajax({
+        type: 'POST',
+        url: `/api/columns`,
         contentType: 'application/json',
         data: JSON.stringify(data),
         success: function (response) {

@@ -5,6 +5,7 @@ import com.example.collaborativetools.card.entitiy.Card;
 import com.example.collaborativetools.card.service.CardService;
 import com.example.collaborativetools.global.dto.BaseResponse;
 import com.example.collaborativetools.global.jwt.UserDetailsImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,7 +18,7 @@ public class CardController {
     private final CardService cardService;
 
     @PostMapping("/{columnId}/cards")
-    public ResponseEntity<BaseResponse<Card>> addCard(@PathVariable Long columnId, @RequestBody CardRequestDto cardRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<BaseResponse<Card>> addCard(@PathVariable Long columnId, @RequestBody  @Valid CardRequestDto cardRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         BaseResponse<Card> response = cardService.addCard(columnId, cardRequestDto, userDetails.getUser());
         return ResponseEntity.ok(response);
     }
