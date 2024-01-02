@@ -1,11 +1,18 @@
 const host = 'http://' + window.location.host;
 var userId = -1;
 let current_boardId = 0;
+let current_cardId = -1;
+let current_cardInfo = null;
 let prev_columnId = -1;
 let prev_sequence = -1;
+let edit_card_title = false;
 // 화면 시작하자마자
 $(document).ready(function () {
-
+    $("#update_card_background_color").on("change", function (event) {
+        let updateColor = $("#update_card_background_color").val();
+        $('#card-content').css("background-color", updateColor);
+        updateBackgroundColor(updateColor);
+    });
     authorizationCheck();//인가
     getBoardList();
 
@@ -13,10 +20,16 @@ $(document).ready(function () {
 })
 
 $('html').click(function (e) {
+    let targetId = e.target.id;
     if (prev_columnId !== -1) {
-        let targetId = e.target.id;
         if (targetId !== `colum_title-${prev_columnId}` && targetId !== `column_title_input-${prev_columnId}`) {
             updateColumn(prev_columnId);
+        }
+    }
+
+    if (edit_card_title) {
+        if (targetId !== 'card_title' && targetId !== 'card_title_input') {
+            updateCardTitle();
         }
     }
 });
@@ -215,7 +228,7 @@ function showEditTitle(columnId, sequence) {
     if (prev_columnId !== -1 && prev_columnId !== columnId) {
         // $('#colum_title-' + prev_columnId).show();
         // $('#column_title_input-' + prev_columnId).hide();
-         updateColumn(prev_columnId);
+        updateColumn(prev_columnId);
     }
 
     $('#colum_title-' + columnId).hide();
@@ -228,7 +241,7 @@ function showEditTitle(columnId, sequence) {
 // 보드 상세 조회
 function showBoardDetails(boardId, title, desc, backgroundColor) {
     current_boardId = boardId;
-    prev_columnId=-1;
+    prev_columnId = -1;
     $('#board_title').text(title);
     $('#board_desc').text(desc);
     $('#board_background').css("background-color", backgroundColor);
@@ -282,7 +295,9 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
                     let cardTitle = card['cardTitle'];
                     let backgroundColor = card['backgroundColor'];
 
-                    let html = `<li class="list-group-item" style="background-color: ${backgroundColor};border: grey solid 1px; border-radius: 10px;margin-bottom: 8px">${cardTitle}</li>`;
+                    let html = `<li class="list-group-item" onclick="showCardDetails('${cardId}')"  
+                    data-bs-toggle="modal" data-bs-target="#CardModal"
+                    style="background-color: ${backgroundColor};border: grey solid 1px; border-radius: 10px;margin-bottom: 8px">${cardTitle}</li>`;
                     $("#card_list-" + columnId).append(html);
                 }
 
@@ -558,7 +573,7 @@ function removeColumn(columnId) {
     });
 }
 
-function unRegisterInBoard(){
+function unRegisterInBoard() {
 
     $.ajax({
         type: 'DELETE', url: `/api/boards/${current_boardId}/users`,
@@ -566,7 +581,192 @@ function unRegisterInBoard(){
             alert(response['msg']);
             win_reload();
         }, error(error, status, request) {
-             alert(error['responseJSON']['msg']);
+            alert(error['responseJSON']['msg']);
+        }
+    });
+}
+
+//카드상세조회
+function showCardDetails(cardId) {
+
+    current_cardId = cardId;
+    $.ajax({
+        type: 'GET', url: `/api/cards/${cardId}`
+        , success: function (response) {
+            let card = response['data'];
+            current_cardInfo = card;
+            let desc = card['description'];
+            let title = card['title'];
+            let dueDate = card['dueDate'];
+            let backgroundColor = card['backgroundColor'];
+
+            if (dueDate != null) {
+                $('#card_due_date_input').val(dueDate);
+                $('#card_due_date').text(dueDate);
+            }
+            if (backgroundColor != null) {
+                $('modal-content').css("background-color", backgroundColor);
+                $('#update_card_background_color').val(backgroundColor);
+            }
+
+            $('#card_title').text(title);
+            $('#card_desc').attr("readonly", true).val(desc).css("background-color", "darkgray");
+            $('#desc_save_btn').hide();
+
+        }, error(error, status, request) {
+            alert(error['responseJSON']['msg']);
+        }
+    });
+
+}
+
+function enableTextArea() {
+    console.log("클릭");
+    $('#desc_save_btn').show();
+    $('#card_desc').attr("readonly", false).css("background-color", "white");
+}
+
+function saveCardDescription() {
+    let desc = $('#card_desc').val();
+    let dueDate;
+    if (current_cardInfo['dueDate'] == null) {
+        dueDate = null
+    } else {
+        dueDate = current_cardInfo['dueDate'].substring(0, 16);
+    }
+
+    data = {
+        'title': current_cardInfo['title'],
+        'description': desc,
+        'backgroundColor': current_cardInfo['backgroundColor'],
+        'sequence': current_cardInfo['sequence'],
+        'dueDate': dueDate
+    }
+
+    $.ajax({
+        type: 'PUT',
+        url: `/api/cards/updatecard/${current_cardId}`,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function (response) {
+            showCardDetails(current_cardId)
+        },
+        error(error, status, request) {
+            console.log(error);
+        }
+    });
+
+}
+
+function showCardInput() {
+    $('#card_title_input').show().val(current_cardInfo['title']);
+    $('#card_title').hide();
+    edit_card_title = true;
+}
+
+function updateCardTitle() {
+    let title = $('#card_title_input').val()
+    let dueDate;
+    if (current_cardInfo['dueDate'] == null) {
+        dueDate = null
+    } else {
+        dueDate = current_cardInfo['dueDate'].substring(0, 16);
+    }
+
+
+    data = {
+        'title': title,
+        'description': current_cardInfo['description'],
+        'backgroundColor': current_cardInfo['backgroundColor'],
+        'sequence': current_cardInfo['sequence'],
+        'dueDate': dueDate
+    }
+
+    $.ajax({
+        type: 'PUT',
+        url: `/api/cards/updatecard/${current_cardId}`,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function (response) {
+            $('#card_title_input').hide().val(title);
+            $('#card_title').show().text(title);
+            edit_card_title = false;
+            showCardDetails(current_cardId)
+        },
+        error(error, status, request) {
+            console.log(error);
+        }
+    });
+}
+
+function saveDueDate() {
+    let dueDate = $('#card_due_date_input').val()
+    console.log(dueDate);
+
+    data = {
+        'title': current_cardInfo['title'],
+        'description': current_cardInfo['description'],
+        'backgroundColor': current_cardInfo['backgroundColor'],
+        'sequence': current_cardInfo['sequence'],
+        'dueDate': dueDate
+    }
+
+    $.ajax({
+        type: 'PUT',
+        url: `/api/cards/updatecard/${current_cardId}`,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function (response) {
+            $('#card_due_date_input').val(dueDate);
+            $('#card_due_date').text(dueDate);
+            showCardDetails(current_cardId)
+        },
+        error(error, status, request) {
+            console.log(error);
+        }
+    });
+}
+
+function removeCard() {
+    $.ajax({
+        type: 'DELETE',
+        url: `/api/cards/${current_cardId}`,
+        success: function (response) {
+            alert(response['msg'])
+            showBoardDetails(current_boardId)
+        },
+        error(error, status, request) {
+            alert(error['responseJSON']['msg'])
+        }
+    });
+}
+
+function updateBackgroundColor(updateColor){
+    let dueDate;
+    if (current_cardInfo['dueDate'] == null) {
+        dueDate = null
+    } else {
+        dueDate = current_cardInfo['dueDate'].substring(0, 16);
+    }
+
+
+    data = {
+        'title': current_cardInfo['title'],
+        'description': current_cardInfo['description'],
+        'backgroundColor': updateColor,
+        'sequence': current_cardInfo['sequence'],
+        'dueDate': dueDate
+    }
+
+    $.ajax({
+        type: 'PUT',
+        url: `/api/cards/updatecard/${current_cardId}`,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function (response) {
+        },
+        error(error, status, request) {
+            console.log(error);
         }
     });
 }

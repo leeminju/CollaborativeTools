@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 
 @Getter
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CardResponseDto {
 
 
