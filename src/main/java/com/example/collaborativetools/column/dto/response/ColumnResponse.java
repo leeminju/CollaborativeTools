@@ -15,7 +15,7 @@ public class ColumnResponse {
 	private final Long id;
 	private final Long boardId;
 	private final String title;
-	private final Integer sequence;
+	private final Double sequence;
 	private final Set<String> cards;
 
 	public static ColumnResponse from(Columns entity) {

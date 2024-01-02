@@ -8,7 +8,7 @@ import lombok.Builder;
 
 @Builder
 public record GetDetailResponseBoardDTO(
-        Long columnId, String columnTitle, Integer sequence, List<CardInColumnDTO> cardTitleList
+        Long columnId, String columnTitle, Double sequence, List<CardInColumnDTO> cardTitleList
 ) {
 
     public static GetDetailResponseBoardDTO of(Columns columns, List<CardInColumnDTO> cardDTOList) {
