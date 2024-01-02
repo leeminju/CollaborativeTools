@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.example.collaborativetools.card.dto.*;
+import com.example.collaborativetools.column.repository.ColumnRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +14,6 @@ import com.example.collaborativetools.board.service.BoardService;
 import com.example.collaborativetools.card.entitiy.Card;
 import com.example.collaborativetools.card.repository.CardRepository;
 import com.example.collaborativetools.column.entitiy.Columns;
-import com.example.collaborativetools.column.repository.ColumnRepository;
 import com.example.collaborativetools.global.constant.ErrorCode;
 import com.example.collaborativetools.global.constant.ResponseCode;
 import com.example.collaborativetools.global.dto.BaseResponse;
@@ -33,7 +33,7 @@ import lombok.RequiredArgsConstructor;
 public class CardService {
     private final CardRepository cardRepository;
     private final UserCardRepository userCardRepository;
-    private final ColumnsRepository columnsRepository;
+    private final ColumnRepository columnsRepository;
     private final UserRepository userRepository;
     private final UserBoardRepository userBoardRepository;
     private final BoardRepository boardRepository;
