@@ -1,11 +1,63 @@
 const host = 'http://' + window.location.host;
 var userId = -1;
+let current_boardId = 0;
+let current_cardId = -1;
+let current_cardInfo = null;
+let prev_columnId = -1;
+let prev_sequence = -1;
+let edit_card_title = false;
 // 화면 시작하자마자
 $(document).ready(function () {
+    $("#update_card_background_color").on("change", function (event) {
+        let updateColor = $("#update_card_background_color").val();
+        $('#card-content').css("background-color", updateColor);
+        updateBackgroundColor(updateColor);
+    });
     authorizationCheck();//인가
     getBoardList();
-
 })
+
+$('html').click(function (e) {
+    let targetId = e.target.id;
+    if (prev_columnId !== -1) {
+        if (targetId !== `colum_title-${prev_columnId}` && targetId !== `column_title_input-${prev_columnId}`) {
+            updateColumn(prev_columnId);
+        }
+    }
+
+    if (edit_card_title) {
+        if (targetId !== 'card_title' && targetId !== 'card_title_input') {
+            updateCardTitle();
+        }
+    }
+});
+
+function updateColumn(prev_columnId) {
+    let title = $(`#column_title_input-${prev_columnId}`).val();
+    let data = {
+        'boardId': current_boardId,
+        'title': title,
+        'sequence': prev_sequence
+
+    }
+    $.ajax({
+        type: 'PUT',
+        url: `/api/columns/${prev_columnId}`,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function (response) {
+            $('#colum_title-' + prev_columnId).text(title);
+            $('#colum_title-' + prev_columnId).show();
+            $('#colum_title-' + prev_columnId).show();
+            $('#column_title_input-' + prev_columnId).hide();
+            prev_columnId = -1;
+        },
+        error(error, status, request) {
+            console.log(error);
+        }
+    });
+}
+
 //드래깅 대상 생성
 const dragger = {
     init(target, options) {
@@ -44,7 +96,7 @@ function setCardDraggable() {
 
     const options = {};
     let cardList = Array.from(document.querySelectorAll(".list-group"));
-     console.log(cardList)
+    console.log(cardList)
     this.dragulaCard = dragger.init(
         Array.from(document.querySelectorAll(".list-group")),
         options
@@ -84,15 +136,15 @@ function setCardDraggable() {
         // 자리가 맨 아래일 경우
         else if (prev && !next) targetCard.sequence = (prev.dataset.sequence * 1) + 1;
 
-        this.updateCard(targetCard);
+        this.updateCardsequence(targetCard);
     });
 }
 
-function updateCard(card) {
-    console.log("uypdate card")
+function updateCardsequence(card) {
+    console.log("update card")
     $.ajax({
         type: 'PUT',
-        url: `/api/cards/changesequence/${card.id}`,
+        url: `/api/boards/${current_boardId}/columns/${card.columnId}/cards/${card.id}/sequence`,
         contentType: 'application/json',
         data: JSON.stringify(card),
         success: function (response) {
@@ -105,6 +157,7 @@ function updateCard(card) {
         }
     });
 }
+
 
 // 인가 : 토큰 유효성 판단
 function authorizationCheck() {
@@ -130,7 +183,6 @@ function authorizationCheck() {
             userId = Number(response['data']['id']);
             $('#username').text(response['data']['username']);
         }, error(error, status, request) {
-            console.log(error);
             CookieRemove();
         }
     });
@@ -189,7 +241,6 @@ function updatePassword() {
         contentType: 'application/json',
         data: JSON.stringify(data),
         success: function (response) {
-            console.log(response);
             alert(response['msg']);
             win_reload();
         },
@@ -228,7 +279,6 @@ function getBoardList() {
         type: 'GET', url: `/api/boards`, success: function (response) {
             for (var i = 0; i < response['data'].length; i++) {
                 let board = response['data'][i];
-                console.log(board);
 
                 let boardId = board['boardId'];
                 let title = board['title'];
@@ -240,11 +290,14 @@ function getBoardList() {
 
                 let tempHtml = `<li class="list-group-item" style="border: black solid 1px;background-color: ${backgroundColor}"
                         onclick = "showBoardDetails('${boardId}','${title}','${desc2}','${backgroundColor}')">${title}
-                    <button onclick="updateBoardModal('${boardId}','${title}','${desc2}','${backgroundColor}')" data-bs-toggle="modal" data-bs-target="#updateBoard" style="float: right" class="btn btn-outline-dark">edit</button>
-                    <button onclick="removeBoard(${boardId})" style="float: right" class="btn btn-outline-dark">remove</button></li>`;
+                    <div style="float:right;display: inline-block; ">     
+                    <button onclick="updateBoardModal('${boardId}','${title}','${desc2}','${backgroundColor}')" data-bs-toggle="modal" data-bs-target="#updateBoard" class="btn btn-outline-dark">edit</button>
+                    <button onclick="removeBoard(${boardId})" class="btn btn-outline-dark">remove</button></div></li>`;
 
                 $('#board_list').append(tempHtml);
                 if (i == 0) {
+                    current_boardId = boardId;
+                    console.log(current_boardId);
                     showBoardDetails(boardId, title, desc1, backgroundColor);
                 }
 
@@ -265,14 +318,29 @@ function removeBoard(boardId) {
             alert(response['msg']);
             win_reload();
         }, error(error, status, request) {
-            alert(error['msg']);
+            alert(error['responseJSON']['msg']);
         }
     });
 }
 
+function showEditTitle(columnId, sequence) {
+    if (prev_columnId !== -1 && prev_columnId !== columnId) {
+        // $('#colum_title-' + prev_columnId).show();
+        // $('#column_title_input-' + prev_columnId).hide();
+        updateColumn(prev_columnId);
+    }
+
+    $('#colum_title-' + columnId).hide();
+    $('#column_title_input-' + columnId).show();
+    prev_columnId = columnId;
+    prev_sequence = sequence;
+}
+
+
 // 보드 상세 조회
 function showBoardDetails(boardId, title, desc, backgroundColor) {
-
+    current_boardId = boardId;
+    prev_columnId = -1;
     $('#board_title').text(title);
     $('#board_desc').text(desc);
     $('#board_background').css("background-color", backgroundColor);
@@ -282,16 +350,30 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
     $.ajax({
         type: 'GET', url: `/api/boards/${boardId}`, success: function (response) {
             let columns = response['data'];
+            let last_sequence = 0;
             $('#column_list').empty();
-            console.log(columns);
+
             for (var i = 0; i < columns.length; i++) {
                 let column = columns[i];
                 let columnId = column['columnId'];
                 let title = column['columnTitle'];
-                let cards = column['cardTitleList'];
                 let sequence = column['sequence'];
+                let cards = column['cardTitleList'];
+                last_sequence = column['sequence'];
+
                 let html = `<div class="card text-dark bg-light mb-3" style="height:fit-content; max-width:18rem; width: 18rem; margin: 10px" xmlns="http://www.w3.org/1999/html">
-                                        <div class="card-header">${title}</div>
+                                        <div class="card-header">
+                                        <span onclick="showEditTitle('${columnId}','${sequence}')" id="colum_title-${columnId}">${title}</span>
+                                        <input class = "column_title_input" style="display: none;width: 75%" value="${title}" id="column_title_input-${columnId}">
+                                         <div class="btn-group" style="float: right">
+  <button type="button" class="btn dropdown"  style="background-color: transparent;border:transparent;" data-bs-toggle="dropdown" aria-expanded="false">
+    • • • 
+  </button>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" onclick="removeColumn('${columnId}')">Remove</a></li>
+    </ul>
+                                            </div>
+                                         </div>
                                           <div class="card-body" data-column-id="${columnId}" data-sequence="${sequence}">
                                                 <ul class="list-group list-group-flush" id="card_list-${columnId}">
                                                 <br></br>
@@ -313,11 +395,11 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
                     let cardTitle = card['cardTitle'];
                     let backgroundColor = card['backgroundColor'];
                     let sequence = card['sequence'];
-                    let html = `<li class="list-group-item" style="background-color: ${backgroundColor};border: grey solid 1px; border-radius: 10px;margin-bottom: 8px" data-card-id="${cardId}" data-sequence=${sequence}>
+                    let html = `<li class="list-group-item" onclick="showCardDetails('${cardId}','${columnId}')"  data-bs-toggle="modal" data-bs-target="#CardModal"
+                    style="background-color: ${backgroundColor};border: grey solid 1px; border-radius: 10px;margin-bottom: 8px" data-card-id="${cardId}" data-sequence=${sequence}>
                             ${cardTitle}
                         </li>`;
-
-                   console.log($("#card_list-" + columnId).children('br').remove())
+                    console.log($("#card_list-" + columnId).children('br').remove())
 
                     $("#card_list-" + columnId).append(html);
                 }
@@ -327,9 +409,11 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
             let html = `<div class="card text-dark bg-light mb-3" style="height:fit-content; max-width:18rem; width: 18rem; margin: 10px">                                    
                                           <div class="card-body">
                                                <button id="add_list_btn-${boardId}"onclick="showColumnTitleArea('${boardId}')" style="width:100%;border: transparent;background-color: transparent">+ Add another list</button>
-                                               <input  id="column_title_input-${boardId}"style="display: none" placeholder="리스트 제목을 입력하세요" style="display:none;margin: 100%">      
+                                               <input  id="new_column_title_input-${boardId}" placeholder="리스트 제목을 입력하세요"
+                                                style="display:none;width: 100%"
+                                                >      
                                                <span>
-                                               <button id="add_list_btn2-${boardId}" style="display: none" class="btn btn-primary">Add list</button>
+                                               <button onclick="addColumn('${boardId}','${last_sequence}')" id="add_list_btn2-${boardId}" style="display: none" class="btn btn-primary">Add list</button>
                                                <button id="close_add_list_btn-${boardId}" style="background-color: transparent;display: none; border: transparent"  onclick="hideColumnTitleArea(${boardId})">X</button>
                                                </span>
                                             </div>
@@ -341,24 +425,24 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
             alert(error['msg']);
         }
     });
-
-
 }
 
 //리스트 추가 시 제목 입력 보이게
 function showColumnTitleArea(boardId) {
+    console.log("컬럼 제목 입력 보이기")
     $('#add_list_btn-' + boardId).hide();
 
-    $('#column_title_input-' + boardId).show();
-    $('#add-list_btn2-' + boardId).show();
+    $('#new_column_title_input-' + boardId).show();
+    $('#add_list_btn2-' + boardId).show();
     $('#close_add_list_btn-' + boardId).show();
 }
 
 function hideColumnTitleArea(boardId) {
+    console.log("컬럼 제목 입력 숨기기")
     $('#add_list_btn-' + boardId).show();
 
-    $('#column_title_input-' + boardId).hide();
-    $('#add-list_btn2-' + boardId).hide();
+    $('#new_column_title_input-' + boardId).hide();
+    $('#add_list_btn2-' + boardId).hide();
     $('#close_add_list_btn-' + boardId).hide();
 }
 
@@ -399,7 +483,6 @@ function createBoard() {
             win_reload();
         },
         error(error, status, request) {
-            console.log(error);
 
             if (error['responseJSON']['data'] != null) {
                 let valid = error['responseJSON']['data'];
@@ -449,8 +532,6 @@ function updateBoard() {
             win_reload();
         },
         error(error, status, request) {
-            console.log(error);
-
             if (error['responseJSON']['data'] != null) {
                 let valid = error['responseJSON']['data'];
                 let str = "";
@@ -528,7 +609,7 @@ function addCard(columnId) {
 
     $.ajax({
         type: 'POST',
-        url: `/api/${columnId}/cards`,
+        url: `/api/boards/${current_boardId}/columns/${columnId}/cards`,
         contentType: 'application/json',
         data: JSON.stringify(data),
         success: function (response) {
@@ -536,8 +617,6 @@ function addCard(columnId) {
             win_reload();
         },
         error(error, status, request) {
-            console.log(error);
-
             if (error['responseJSON']['data'] != null) {
                 let valid = error['responseJSON']['data'];
                 let str = "";
@@ -549,6 +628,256 @@ function addCard(columnId) {
             } else {
                 alert(error['responseJSON']['msg']);
             }
+        }
+    });
+}
+
+function addColumn(boardId, last_sequence) {
+    let title = $('#new_column_title_input-' + boardId).val();
+    let sequence = last_sequence + 1;
+
+
+    let data = {
+        'boardId': boardId, 'title': title, 'sequence': sequence
+    };
+
+    $.ajax({
+        type: 'POST',
+        url: `/api/columns`,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function (response) {
+            alert(response['msg']);
+            win_reload();
+        },
+        error(error, status, request) {
+            if (error['responseJSON']['data'] != null) {
+                let valid = error['responseJSON']['data'];
+                let str = "";
+
+                if (valid['title']) {
+                    str += valid['title'] + "\n";
+                }
+                alert(str);
+            } else {
+                alert(error['responseJSON']['msg']);
+            }
+        }
+    });
+}
+
+
+function removeColumn(columnId) {
+    $.ajax({
+        type: 'DELETE', url: `/api/columns/${columnId}`,
+        success: function (response) {
+            alert(response['msg']);
+            win_reload();
+        }, error(error, status, request) {
+            alert(error['responseJSON']['msg']);
+        }
+    });
+}
+
+function unRegisterInBoard() {
+
+    $.ajax({
+        type: 'DELETE', url: `/api/boards/${current_boardId}/users`,
+        success: function (response) {
+            alert(response['msg']);
+            win_reload();
+        }, error(error, status, request) {
+            alert(error['responseJSON']['msg']);
+        }
+    });
+}
+
+//카드상세조회
+function showCardDetails(cardId, columnId) {
+    current_cardId = cardId;
+    $.ajax({
+        type: 'GET', url: `/api/boards/${current_boardId}/columns/${columnId}/cards/${cardId}`
+        , success: function (response) {
+            let card = response['data'];
+            current_cardInfo = card;
+            let desc = card['description'];
+            let title = card['title'];
+            let dueDate = card['dueDate'];
+            let backgroundColor = card['backgroundColor'];
+
+            if (dueDate != null) {
+                $('#card_due_date_input').val(dueDate);
+                $('#card_due_date').text(dueDate);
+            }
+            if (backgroundColor != null) {
+                $('#card-content').css("background-color", backgroundColor);
+                $('#update_card_background_color').val(backgroundColor);
+            }
+
+            $('#card_title').text(title);
+            $('#card_desc').attr("readonly", true).val(desc).css("background-color", "darkgray");
+            $('#desc_save_btn').hide();
+
+        }, error(error, status, request) {
+            alert(error['responseJSON']['msg']);
+        }
+    });
+
+}
+
+function enableTextArea() {
+    console.log("클릭");
+    $('#desc_save_btn').show();
+    $('#card_desc').attr("readonly", false).css("background-color", "white");
+}
+
+function saveCardDescription() {
+    let columnId = current_cardInfo['columnId'];
+    let desc = $('#card_desc').val();
+    let dueDate;
+    if (current_cardInfo['dueDate'] == null) {
+        dueDate = null
+    } else {
+        dueDate = current_cardInfo['dueDate'].substring(0, 16);
+    }
+
+    data = {
+        'title': current_cardInfo['title'],
+        'description': desc,
+        'backgroundColor': current_cardInfo['backgroundColor'],
+        'sequence': current_cardInfo['sequence'],
+        'dueDate': dueDate
+    }
+
+    $.ajax({
+        type: 'PUT',
+        url: `/api/boards/${current_boardId}/columns/${columnId}/cards/${current_cardId}/update`,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function (response) {
+            showCardDetails(current_cardId, columnId)
+        },
+        error(error, status, request) {
+            console.log(error);
+        }
+    });
+
+}
+
+function showCardInput() {
+    $('#card_title_input').show().val(current_cardInfo['title']);
+    $('#card_title').hide();
+    edit_card_title = true;
+}
+
+function updateCardTitle() {
+    console.log(current_cardInfo);
+    let columnId = current_cardInfo['columnId'];
+    let title = $('#card_title_input').val()
+    let dueDate;
+    if (current_cardInfo['dueDate'] == null) {
+        dueDate = null
+    } else {
+        dueDate = current_cardInfo['dueDate'].substring(0, 16);
+    }
+
+
+    data = {
+        'title': title,
+        'description': current_cardInfo['description'],
+        'backgroundColor': current_cardInfo['backgroundColor'],
+        'sequence': current_cardInfo['sequence'],
+        'dueDate': dueDate
+    }
+
+    $.ajax({
+        type: 'PUT',
+        url: `/api/boards/${current_boardId}/columns/${columnId}/cards/${current_cardId}/update`,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function (response) {
+            $('#card_title_input').hide().val(title);
+            $('#card_title').show().text(title);
+            edit_card_title = false;
+            showCardDetails(current_cardId, columnId)
+        },
+        error(error, status, request) {
+            console.log(error);
+        }
+    });
+}
+
+function saveDueDate() {
+    let columnId = current_cardInfo['columnId'];
+    let dueDate = $('#card_due_date_input').val()
+    console.log(dueDate);
+
+    data = {
+        'title': current_cardInfo['title'],
+        'description': current_cardInfo['description'],
+        'backgroundColor': current_cardInfo['backgroundColor'],
+        'sequence': current_cardInfo['sequence'],
+        'dueDate': dueDate
+    }
+
+    $.ajax({
+        type: 'PUT',
+        url: `/api/boards/${current_boardId}/columns/${columnId}/cards/${current_cardId}/update`,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function (response) {
+            $('#card_due_date_input').val(dueDate);
+            $('#card_due_date').text(dueDate);
+            showCardDetails(current_cardId, columnId)
+        },
+        error(error, status, request) {
+            console.log(error);
+        }
+    });
+}
+
+function removeCard() {
+    let columnId = current_cardInfo['columnId'];
+    $.ajax({
+        type: 'DELETE',
+        url: `/api/boards/${current_boardId}/columns/${columnId}/cards/${current_cardId}`,
+        success: function (response) {
+            alert(response['msg'])
+            showBoardDetails(current_boardId, columnId)
+        },
+        error(error, status, request) {
+            alert(error['responseJSON']['msg'])
+        }
+    });
+}
+
+function updateBackgroundColor(updateColor) {
+    let columnId = current_cardInfo['columnId'];
+    let dueDate;
+    if (current_cardInfo['dueDate'] == null) {
+        dueDate = null
+    } else {
+        dueDate = current_cardInfo['dueDate'].substring(0, 16);
+    }
+
+
+    data = {
+        'title': current_cardInfo['title'],
+        'description': current_cardInfo['description'],
+        'backgroundColor': updateColor,
+        'sequence': current_cardInfo['sequence'],
+        'dueDate': dueDate
+    }
+
+    $.ajax({
+        type: 'PUT',
+        url: `/api/boards/${current_boardId}/columns/${columnId}/cards/${current_cardId}/update`,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function (response) {
+        },
+        error(error, status, request) {
+            console.log(error);
         }
     });
 }

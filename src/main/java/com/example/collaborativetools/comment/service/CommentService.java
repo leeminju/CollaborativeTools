@@ -26,11 +26,17 @@ public class CommentService {
 	private final CardRepository cardRepository;
 
 	@Transactional
-	public CommentResponse createComment(CommentCreateRequest request, User loginUser) {
-		Card card = cardRepository.findById(request.getCardId())
-			.orElseThrow(() -> new ApiException(NOT_FOUND_CARD));
+	public CommentResponse createComment(
+		Long boardId,
+		Long columnId,
+		Long cardId,
+		CommentCreateRequest request,
+		User loginUser
+	) {
+		Card card = findCard(cardId);
 
-		checkUserPermission(request.getBoardId(), loginUser.getId());
+		validateColumn(columnId, card);
+		checkUserPermission(boardId, loginUser.getId());
 
 		Comment comment = request.toEntity(card, loginUser);
 		comment = commentRepository.save(comment);
@@ -39,10 +45,19 @@ public class CommentService {
 	}
 
 	@Transactional
-	public CommentResponse updateComment(Long commentId, CommentUpdateRequest request, User loginUser) {
+	public CommentResponse updateComment(
+		Long boardId,
+		Long columnId,
+		Long cardId,
+		Long commentId,
+		CommentUpdateRequest request,
+		User loginUser
+	) {
+		Card card = findCard(cardId);
 		Comment comment = findComment(commentId);
 
-		checkUserPermission(request.getBoardId(), loginUser.getId());
+		validateColumn(columnId, card);
+		checkUserPermission(boardId, loginUser.getId());
 		checkCommentPermission(comment.getUser().getId(), loginUser.getId());
 
 		comment.update(request);
@@ -51,8 +66,18 @@ public class CommentService {
 	}
 
 	@Transactional
-	public void deleteComment(Long commentId, User loginUser) {
+	public void deleteComment(
+		Long boardId,
+		Long columnId,
+		Long cardId,
+		Long commentId,
+		User loginUser
+	) {
+		Card card = findCard(cardId);
 		Comment comment = findComment(commentId);
+
+		validateColumn(columnId, card);
+		checkUserPermission(boardId, loginUser.getId());
 		checkCommentPermission(comment.getUser().getId(), loginUser.getId());
 
 		commentRepository.delete(comment);
@@ -64,14 +89,27 @@ public class CommentService {
 		}
 	}
 
-	private void checkCommentPermission(Long writerId, Long loginUserId) {
-		if (!writerId.equals(loginUserId)) {
-			throw new ApiException(NO_COMMENT_AUTHORITY_EXCEPTION);
-		}
+
+
+	public Card findCard(Long cardId) {
+		return cardRepository.findById(cardId)
+			.orElseThrow(() -> new ApiException(NOT_FOUND_CARD));
 	}
 
 	public Comment findComment(Long commentId) {
 		return commentRepository.findById(commentId)
 			.orElseThrow(() -> new ApiException(NOT_FOUND_COMMENT));
+	}
+	
+	private static void checkCommentPermission(Long writerId, Long loginUserId) {
+		if (!writerId.equals(loginUserId)) {
+			throw new ApiException(NO_COMMENT_AUTHORITY_EXCEPTION);
+		}
+	}
+
+	private static void validateColumn(Long columnId, Card card) {
+		if (!columnId.equals(card.getColumn().getId())) {
+			throw new ApiException(INVALID_VALUE);
+		}
 	}
 }

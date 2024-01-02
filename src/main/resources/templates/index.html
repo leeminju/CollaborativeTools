@@ -176,6 +176,59 @@
     </div>
 </div>
 
+<!--카드-->
+<div class="modal fade" id="CardModal" data-bs-backdrop="static" aria-hidden="true"
+     aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content" id="card-content">
+
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="card_title" onclick="showCardInput()"></h1>
+                <input type="text" id="card_title_input" style="display:none; width: 90%">
+                <button onclick="win_reload()" type="button" class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div>
+                    <h4>Description</h4>
+                    <textarea readonly style="background-color: darkgray" type="text" class="form-control"
+                              id="card_desc"
+                              placeholder="카드 설명을 입력해주세요"
+                              rows="3" onclick="enableTextArea()"></textarea>
+
+                    <button id="desc_save_btn" style="display: none" class="btn btn-primary"
+                            onclick="saveCardDescription()">Save
+                    </button>
+                </div>
+
+                <div>
+                    <h4>마감일</h4>
+                    <div id="card_due_date"></div>
+                    <div style="display: inline-block">
+                        <input type="datetime-local" id="card_due_date_input">
+                        <button class="btn btn-primary"
+                                onclick="saveDueDate()">Save
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <h4>댓글</h4>
+                </div>
+                <div style="margin-top:20px;">
+                    <h4>배경색 설정:</h4>
+                    <input type="color" value="#FFFFFF" id="update_card_background_color">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-danger" data-bs-dismiss="modal" onclick="removeCard()">Remove</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div class="board">
     <div class="board_left">
@@ -187,10 +240,15 @@
     </div>
 
     <div class="board_right" id="board_background">
-        <div style="margin: 10px"><span id="board_title" style=" font-size: 20px"></span>
-            <button style="float: right" class="btn btn-outline-dark" data-bs-toggle="modal"
-                    data-bs-target="#inviteMember" onclick="getBoardMember()" id="invite_btn">invite
-            </button>
+        <div style="margin: 10px">
+            <span id="board_title" style=" font-size: 20px"></span>
+            <div style="float:right;display: inline-block; ">
+                <button class="btn btn-outline-dark" data-bs-toggle="modal"
+                        data-bs-target="#inviteMember" onclick="getBoardMember()" id="invite_btn">초대
+                </button>
+                <button class="btn btn-outline-dark" onclick="unRegisterInBoard()">탈퇴
+                </button>
+            </div>
         </div>
         <textarea style="background-color:transparent; margin: 20px auto 0px auto;width: 97%" rows="auto" type="text"
                   class="form-control" id="board_desc" disabled></textarea>
