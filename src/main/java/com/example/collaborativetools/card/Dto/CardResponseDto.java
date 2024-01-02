@@ -25,6 +25,7 @@ public class CardResponseDto {
     private final LocalDateTime modifiedAt;
     private final List<UserInfoDto>members;
     private final List<CommentResponse> comments;
+    private final Long columnId;
 
     public CardResponseDto(Card card) {
         this.title = card.getTitle();
@@ -40,5 +41,6 @@ public class CardResponseDto {
         this.comments = card.getComments().stream()
                 .map(CommentResponse::from)
                 .collect(Collectors.toList());
+        this.columnId = card.getColumn().getId();
     }
 }

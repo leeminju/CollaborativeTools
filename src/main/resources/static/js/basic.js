@@ -199,6 +199,7 @@ function getBoardList() {
                 $('#board_list').append(tempHtml);
                 if (i == 0) {
                     current_boardId = boardId;
+                    console.log(current_boardId);
                     showBoardDetails(boardId, title, desc1, backgroundColor);
                 }
 
@@ -295,7 +296,8 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
                     let cardTitle = card['cardTitle'];
                     let backgroundColor = card['backgroundColor'];
 
-                    let html = `<li class="list-group-item" onclick="showCardDetails('${cardId}')"  
+
+                    let html = `<li class="list-group-item"  onclick="showCardDetails('${cardId}','${columnId}')"  
                     data-bs-toggle="modal" data-bs-target="#CardModal"
                     style="background-color: ${backgroundColor};border: grey solid 1px; border-radius: 10px;margin-bottom: 8px">${cardTitle}</li>`;
                     $("#card_list-" + columnId).append(html);
@@ -503,7 +505,7 @@ function addCard(columnId) {
 
     $.ajax({
         type: 'POST',
-        url: `/api/${columnId}/cards`,
+        url: `/api/boards/${current_boardId}/columns/${columnId}/cards`,
         contentType: 'application/json',
         data: JSON.stringify(data),
         success: function (response) {
@@ -587,11 +589,10 @@ function unRegisterInBoard() {
 }
 
 //카드상세조회
-function showCardDetails(cardId) {
-
+function showCardDetails(cardId, columnId) {
     current_cardId = cardId;
     $.ajax({
-        type: 'GET', url: `/api/cards/${cardId}`
+        type: 'GET', url: `/api/boards/${current_boardId}/columns/${columnId}/cards/${cardId}`
         , success: function (response) {
             let card = response['data'];
             current_cardInfo = card;
@@ -605,7 +606,7 @@ function showCardDetails(cardId) {
                 $('#card_due_date').text(dueDate);
             }
             if (backgroundColor != null) {
-                $('modal-content').css("background-color", backgroundColor);
+                $('#card-content').css("background-color", backgroundColor);
                 $('#update_card_background_color').val(backgroundColor);
             }
 
@@ -627,6 +628,7 @@ function enableTextArea() {
 }
 
 function saveCardDescription() {
+    let columnId = current_cardInfo['columnId'];
     let desc = $('#card_desc').val();
     let dueDate;
     if (current_cardInfo['dueDate'] == null) {
@@ -645,11 +647,11 @@ function saveCardDescription() {
 
     $.ajax({
         type: 'PUT',
-        url: `/api/cards/updatecard/${current_cardId}`,
+        url: `/api/boards/${current_boardId}/columns/${columnId}/cards/${current_cardId}/update`,
         contentType: 'application/json',
         data: JSON.stringify(data),
         success: function (response) {
-            showCardDetails(current_cardId)
+            showCardDetails(current_cardId,columnId)
         },
         error(error, status, request) {
             console.log(error);
@@ -665,6 +667,8 @@ function showCardInput() {
 }
 
 function updateCardTitle() {
+    console.log(current_cardInfo);
+    let columnId = current_cardInfo['columnId'];
     let title = $('#card_title_input').val()
     let dueDate;
     if (current_cardInfo['dueDate'] == null) {
@@ -684,14 +688,14 @@ function updateCardTitle() {
 
     $.ajax({
         type: 'PUT',
-        url: `/api/cards/updatecard/${current_cardId}`,
+        url: `/api/boards/${current_boardId}/columns/${columnId}/cards/${current_cardId}/update`,
         contentType: 'application/json',
         data: JSON.stringify(data),
         success: function (response) {
             $('#card_title_input').hide().val(title);
             $('#card_title').show().text(title);
             edit_card_title = false;
-            showCardDetails(current_cardId)
+            showCardDetails(current_cardId,columnId)
         },
         error(error, status, request) {
             console.log(error);
@@ -700,6 +704,7 @@ function updateCardTitle() {
 }
 
 function saveDueDate() {
+    let columnId = current_cardInfo['columnId'];
     let dueDate = $('#card_due_date_input').val()
     console.log(dueDate);
 
@@ -713,13 +718,13 @@ function saveDueDate() {
 
     $.ajax({
         type: 'PUT',
-        url: `/api/cards/updatecard/${current_cardId}`,
+        url: `/api/boards/${current_boardId}/columns/${columnId}/cards/${current_cardId}/update`,
         contentType: 'application/json',
         data: JSON.stringify(data),
         success: function (response) {
             $('#card_due_date_input').val(dueDate);
             $('#card_due_date').text(dueDate);
-            showCardDetails(current_cardId)
+            showCardDetails(current_cardId,columnId)
         },
         error(error, status, request) {
             console.log(error);
@@ -728,12 +733,13 @@ function saveDueDate() {
 }
 
 function removeCard() {
+    let columnId = current_cardInfo['columnId'];
     $.ajax({
         type: 'DELETE',
-        url: `/api/cards/${current_cardId}`,
+        url: `/api/boards/${current_boardId}/columns/${columnId}/cards/${current_cardId}`,
         success: function (response) {
             alert(response['msg'])
-            showBoardDetails(current_boardId)
+            showBoardDetails(current_boardId,columnId)
         },
         error(error, status, request) {
             alert(error['responseJSON']['msg'])
@@ -741,7 +747,8 @@ function removeCard() {
     });
 }
 
-function updateBackgroundColor(updateColor){
+function updateBackgroundColor(updateColor) {
+    let columnId = current_cardInfo['columnId'];
     let dueDate;
     if (current_cardInfo['dueDate'] == null) {
         dueDate = null
@@ -760,7 +767,7 @@ function updateBackgroundColor(updateColor){
 
     $.ajax({
         type: 'PUT',
-        url: `/api/cards/updatecard/${current_cardId}`,
+        url: `/api/boards/${current_boardId}/columns/${columnId}/cards/${current_cardId}/update`,
         contentType: 'application/json',
         data: JSON.stringify(data),
         success: function (response) {

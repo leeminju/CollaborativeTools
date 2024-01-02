@@ -1,6 +1,7 @@
 package com.example.collaborativetools.card.service;
 
 import com.example.collaborativetools.board.entitiy.Board;
+import com.example.collaborativetools.board.repository.BoardRepository;
 import com.example.collaborativetools.board.service.BoardService;
 import com.example.collaborativetools.card.Dto.*;
 import com.example.collaborativetools.card.entitiy.Card;
@@ -33,15 +34,18 @@ public class CardService {
     private final ColumnsRepository columnsRepository;
     private final UserRepository userRepository;
     private final UserBoardRepository userBoardRepository;
+    private final BoardRepository boardRepository;
     private final BoardService boardService;
 
-    public BaseResponse<Card> addCard(Long columnId, CardRequestDto cardRequestDto, User user) {
+    public BaseResponse<Card> addCard(Long boardId, Long columnId, CardRequestDto cardRequestDto, User user) {
 
-        Columns columns = columnsRepository.findById(columnId).orElseThrow(() -> new NullPointerException("존재하지 않는 컬럼입니다"));
+        Board boards = checkBoard(boardId);
+        Columns columns = checkColumn(columnId);
 
         //보드 유저 확인
-//        validateUserInvitation(columns.getBoard().getId(), user.getId());
 
+        validateUserInvitation(boards.getId(), user.getId());
+      
         Integer lastSequence = cardRepository.findLastSequenceInColumn(columns.getId());
         if (lastSequence == null) lastSequence = 0;
 
@@ -57,13 +61,17 @@ public class CardService {
         return BaseResponse.of("카드가 추가되었습니다", HttpStatus.OK.value(), card);
     }
 
-    public BaseResponse<Card> joinToCardMember(Long cardId, InviteDto inviteDto) {
-        User user = userRepository.findByUsername(inviteDto.getUsername()).orElseThrow(() -> new NullPointerException("존재하지 않는 유저입니다"));
+    public BaseResponse<Card> joinToCardMember(Long boardId, Long columnId, Long cardId, InviteDto inviteDto, User user) {
+        User userToInvite = userRepository.findByUsername(inviteDto.getUsername()).orElseThrow(() -> new NullPointerException("존재하지 않는 유저입니다"));
         Card card = cardRepository.findById(cardId).orElseThrow(() -> new NullPointerException("존재하지 않는 카드입니다"));
-        Board board = card.getColumn().getBoard();
+        Board boards = checkBoard(boardId);
+        checkColumn(columnId);
 
-        Optional<UserBoard> userBoardOptional = userBoardRepository.findByBoardAndUser(board, user);
-        if (userCardRepository.existsByCardAndUser(card, user)) {
+        //보드 유저 확인
+        validateUserInvitation(boards.getId(), user.getId());
+
+        Optional<UserBoard> userBoardOptional = userBoardRepository.findByBoardAndUser(boards, userToInvite);
+        if (userCardRepository.existsByCardAndUser(card, userToInvite)) {
             return BaseResponse.of("이미 카드 멤버에 존재합니다", HttpStatus.OK.value(), null);
         } else if (userBoardOptional.isPresent()) {
             UserBoard userBoard = userBoardOptional.get();
@@ -81,7 +89,13 @@ public class CardService {
     }
 
     @Transactional
-    public BaseResponse<Card> updateCard(Long cardId, CardUpdateRequestDto cardUpdateDto) {
+    public BaseResponse<Card> updateCard(Long boardId, Long columnId, Long cardId, CardUpdateRequestDto cardUpdateDto, User user) {
+        Board boards = checkBoard(boardId);
+        checkColumn(columnId);
+
+        //보드 유저 확인
+        validateUserInvitation(boards.getId(), user.getId());
+
         Card card = cardRepository.findById(cardId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_CARD));
         card.update(cardUpdateDto);
 
@@ -89,21 +103,39 @@ public class CardService {
     }
 
     @Transactional
-    public BaseResponse<String> deleteCard(Long cardId) {
+    public BaseResponse<String> deleteCard(Long boardId, Long columnId, Long cardId, User user) {
+        Board boards = checkBoard(boardId);
+        checkColumn(columnId);
+
+        //보드 유저 확인
+        validateUserInvitation(boards.getId(), user.getId());
+
         Card card = cardRepository.findById(cardId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_CARD));
         cardRepository.delete(card);
 
         return BaseResponse.of(ResponseCode.DELETED_CARD, null);
     }
 
-    public BaseResponse<CardResponseDto> getCard(Long cardId) {
+    public BaseResponse<CardResponseDto> getCard(Long boardId, Long columnId, Long cardId, User user) {
+        Board boards = checkBoard(boardId);
+        checkColumn(columnId);
+
+        //보드 유저 확인
+        validateUserInvitation(boards.getId(), user.getId());
+
         Card card = cardRepository.findById(cardId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_CARD));
 
         return BaseResponse.of("카드를 조회하였습니다", HttpStatus.OK.value(), new CardResponseDto(card));
     }
 
     @Transactional
-    public BaseResponse<Card> changeCardSequence(Long cardId, CardSequenceDto cardSequenceDto) {
+    public BaseResponse<Card> changeCardSequence(Long boardId, Long columnId, Long cardId, CardSequenceDto cardSequenceDto, User user) {
+        Board boards = checkBoard(boardId);
+        checkColumn(columnId);
+
+        //보드 유저 확인
+        validateUserInvitation(boards.getId(), user.getId());
+
         Card card = cardRepository.findById(cardId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_CARD));
         int newSequence = cardSequenceDto.getSequence();
         int currentSequence = card.getSequence();
@@ -145,10 +177,20 @@ public class CardService {
         return BaseResponse.of("카드 순서를 변경하였습니다", HttpStatus.OK.value(), card);
     }
 
-//    private void validateUserInvitation(Long boardId, Long userId) {
-//        boolean isUserInvited = boardService.isUserInvited(boardId, userId);
-//        if (!isUserInvited) {
-//            throw new SecurityException("보드에 초대되지 않은 사용자는 카드에 접근할 수 없습니다.");
-//        }
-//    }
+
+    private void validateUserInvitation(Long boardId, Long userId) {
+        boolean isUserInvited = boardService.isUserInvited(boardId, userId);
+        if (!isUserInvited) {
+            throw new SecurityException("보드에 초대되지 않은 사용자는 카드에 접근할 수 없습니다.");
+        }
+    }
+
+    private Board checkBoard(Long boardId) {
+        return boardRepository.findById(boardId).orElseThrow(() -> new NullPointerException("존재하지 않는 보드입니다"));
+    }
+
+    private Columns checkColumn(Long columnId) {
+        return columnsRepository.findById(columnId).orElseThrow(() -> new NullPointerException("존재하지 않는 컬럼입니다"));
+    }
+
 }
