@@ -1,6 +1,6 @@
 package com.example.collaborativetools.card.controller;
 
-import com.example.collaborativetools.card.Dto.*;
+import com.example.collaborativetools.card.dto.*;
 import com.example.collaborativetools.card.entitiy.Card;
 import com.example.collaborativetools.card.service.CardService;
 import com.example.collaborativetools.global.dto.BaseResponse;
@@ -41,7 +41,7 @@ public class CardController {
     }
 
     @PutMapping("/{cardId}/sequence")
-    public ResponseEntity<BaseResponse<Card>> changeCardSequence(@PathVariable Long boardId, @PathVariable Long columnId, @PathVariable Long cardId, @RequestBody CardSequenceDto cardSequenceDto,  @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<BaseResponse<Card>> changeCardSequence(@PathVariable Long boardId, @PathVariable Long columnId, @PathVariable Long cardId, @RequestBody CardSequenceDto cardSequenceDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         BaseResponse<Card> response = cardService.changeCardSequence(boardId, columnId, cardId, cardSequenceDto, userDetails.getUser());
         return ResponseEntity.ok(response);
     }

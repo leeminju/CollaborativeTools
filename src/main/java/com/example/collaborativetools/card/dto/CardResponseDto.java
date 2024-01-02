@@ -1,10 +1,10 @@
-package com.example.collaborativetools.card.Dto;
+package com.example.collaborativetools.card.dto;
 
 import com.example.collaborativetools.card.entitiy.Card;
 import com.example.collaborativetools.comment.dto.response.CommentResponse;
 import com.example.collaborativetools.user.dto.UserInfoDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Builder;
+
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 
 @Getter
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CardResponseDto {
 
 
@@ -26,6 +25,7 @@ public class CardResponseDto {
     private final LocalDateTime modifiedAt;
     private final List<UserInfoDto>members;
     private final List<CommentResponse> comments;
+    private final Long columnId;
 
     public CardResponseDto(Card card) {
         this.title = card.getTitle();
@@ -41,5 +41,6 @@ public class CardResponseDto {
         this.comments = card.getComments().stream()
                 .map(CommentResponse::from)
                 .collect(Collectors.toList());
+        this.columnId = card.getColumn().getId();
     }
 }
