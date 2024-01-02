@@ -19,32 +19,33 @@ import org.hibernate.annotations.OnDeleteAction;
 @Table(name = "comments")
 @Entity
 public class Comment extends Timestamped {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	private String comment;
+    private String comment;
 
-	@ManyToOne
-	@JoinColumn(name = "card_id", nullable = false)
-	private Card card;
+    @ManyToOne
+    @JoinColumn(name = "card_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Card card;
 
-	@ManyToOne
-	@JoinColumn(name = "user_id", nullable = false)
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	private User user;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private User user;
 
-	private Comment(String comment, Card card, User user) {
-		this.comment = comment;
-		this.card = card;
-		this.user = user;
-	}
+    private Comment(String comment, Card card, User user) {
+        this.comment = comment;
+        this.card = card;
+        this.user = user;
+    }
 
-	public static Comment create(String comment, Card card, User user) {
-		return new Comment(comment, card, user);
-	}
+    public static Comment create(String comment, Card card, User user) {
+        return new Comment(comment, card, user);
+    }
 
-	public void update(CommentUpdateRequest request) {
-		this.comment = request.getComment();
-	}
+    public void update(CommentUpdateRequest request) {
+        this.comment = request.getComment();
+    }
 }
