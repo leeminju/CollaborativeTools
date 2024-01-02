@@ -4,6 +4,7 @@ import static com.example.collaborativetools.global.constant.ResponseCode.*;
 
 import com.example.collaborativetools.board.dto.CreateBoardDTO;
 import com.example.collaborativetools.board.dto.CreateBoardDTO.Response;
+import com.example.collaborativetools.board.dto.GetDetailResponseBoardDTO;
 import com.example.collaborativetools.board.dto.GetMemberResponseBoardDTO;
 import com.example.collaborativetools.board.dto.GetResponseBoardDTO;
 import com.example.collaborativetools.board.dto.InviteRequestBoardDTO;
@@ -112,6 +113,37 @@ public class BoardController {
         BaseResponse.of(GET_MEMBER_BOARD, ResponseDTO));
 
   }
+
+
+  // 보드 상세 조회
+  @GetMapping("/{boardId}")
+  public ResponseEntity<BaseResponse<List<GetDetailResponseBoardDTO>>> getBoardId(
+      @PathVariable Long boardId,
+      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+    List<GetDetailResponseBoardDTO> ResponseDTO = boardService.getBoardId(boardId,
+        userDetails.getUser().getId());
+
+    return ResponseEntity.status(HttpStatus.OK).body(
+        BaseResponse.of(GET_DETAIL_BOARD, ResponseDTO));
+  }
+
+  //보드 멤버 탈퇴
+  @DeleteMapping("/{boardId}/users")
+  public ResponseEntity<BaseResponse<String>> deleteMemberToBoard(
+      @PathVariable Long boardId,
+      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+    Long userId = userDetails.getUser().getId();
+
+    boardService.deleteMemberToBoard(boardId,userId);
+
+
+    return ResponseEntity.status(HttpStatus.OK).body(
+        BaseResponse.of(DELETE_MEMBER_BOARD,
+            String.format("%d번 보드 %d번 유저 탈퇴 완료", boardId, userId)));
+  }
+
 
 
 }

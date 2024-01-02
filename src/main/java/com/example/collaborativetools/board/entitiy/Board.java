@@ -34,7 +34,7 @@ public class Board extends Timestamped {
     private List<UserBoard> userBoardList = new ArrayList<>();
 
 
-    @OneToMany(mappedBy = "board", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "board",cascade = CascadeType.REMOVE)
     private List<Columns> columnsList = new ArrayList<>();
 
     public void updateBoard(String title, String description, String backgroundColor) {

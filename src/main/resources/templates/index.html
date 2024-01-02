@@ -19,6 +19,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.1.4/pagination.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.1.4/pagination.css"/>
     <script src="/js/basic.js"></script>
+    <link rel="stylesheet" href="/static/css/dragula.min.css">
+    <script src="/static/js/dragula.min.js"></script>
     <title>메인 페이지 </title>
 </head>
 <body>
@@ -67,6 +69,7 @@
     </div>
 </div>
 
+<!--회원탈퇴-->
 <div class="modal fade" id="Unregister" aria-hidden="true"
      aria-labelledby="exampleModalToggleLabel" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable">
@@ -87,6 +90,114 @@
         </div>
     </div>
 </div>
+
+<!--게시판 멤버 초대-->
+<div class="modal fade" id="inviteMember" data-bs-backdrop="static" aria-hidden="true"
+     aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">게시판 멤버 추가</h1>
+                <button onclick="win_reload()" type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <input type="text" class="form-control" id="invite_member_name" placeholder="초대할 멤버"
+                           style="width: 87%;display: inline-block;">
+                    <button class="btn btn-outline-dark" onclick="inviteMember()">초대</button>
+                </div>
+
+                <div style="margin-top: 10px">보드 멤버 목록</div>
+                <ul class="list-group list-group-flush" id="board_member_list">
+
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button onclick="win_reload()" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--게시판 추가-->
+<div class="modal fade" id="createBoard" data-bs-backdrop="static" aria-hidden="true"
+     aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">게시판 추가</h1>
+                <button onclick="win_reload()" type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" id="create_board_title" placeholder="게시판 제목">
+                <textarea type="text" class="form-control" id="create_board_desc" placeholder="게시판 설명"
+                          rows="3"></textarea>
+                <label for="create_background_color">배경색 설정:</label>
+                <input type="color" id="create_background_color">
+            </div>
+            <div class="modal-footer">
+                <button onclick="win_reload()" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close
+                </button>
+                <button class="btn btn-light" onclick="createBoard()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--게시판 수정-->
+<div class="modal fade" id="updateBoard" data-bs-backdrop="static" aria-hidden="true"
+     aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">게시판 편집</h1>
+                <button onclick="win_reload()" type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="text" class="form-control" id="update_board_title" placeholder="게시판 제목">
+                <textarea type="text" class="form-control" id="update_board_desc" placeholder="게시판 설명"
+                          rows="3"></textarea>
+                <label for="update_background_color">배경색 설정:</label>
+                <input type="color" id="update_background_color">
+            </div>
+
+            <div class="modal-footer">
+                <button onclick="win_reload()" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close
+                </button>
+                <button class="btn btn-light" onclick="updateBoard()" id="board_update_btn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="board">
+    <div class="board_left">
+        <div>
+            게시판 목록
+        </div>
+        <ul class="list-group list-group-flush" id="board_list">
+        </ul>
+    </div>
+
+    <div class="board_right" id="board_background">
+        <div style="margin: 10px"><span id="board_title" style=" font-size: 20px"></span>
+            <button style="float: right" class="btn btn-outline-dark" data-bs-toggle="modal"
+                    data-bs-target="#inviteMember" onclick="getBoardMember()" id="invite_btn">invite
+            </button>
+        </div>
+        <textarea style="background-color:transparent; margin: 20px auto 0px auto;width: 97%" rows="auto" type="text"
+                  class="form-control" id="board_desc" disabled></textarea>
+        <div class="colum_list" id="column_list"></div>
+    </div>
+</div>
+
 
 </body>
 </html>

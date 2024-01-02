@@ -9,6 +9,41 @@
     font-family: 'NanumSquareNeo-Variable', serif;
 }
 
+.board {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin: 10px;
+}
+
+.board_left {
+    border: black solid 1px;
+    margin: 10px;
+    width: 20%;
+    height: 600px;
+    overflow-y: scroll;
+}
+
+
+.board_right {
+    border: black solid 1px;
+    margin: 10px;
+    width: 80%;
+    height: 600px;
+    overflow-y: scroll;
+}
+
+.colum_list {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    height: 480px;
+
+    .card {
+        flex: 0 0 auto;
+    }
+}
+
 .header {
     height: 120px;
     box-sizing: border-box;

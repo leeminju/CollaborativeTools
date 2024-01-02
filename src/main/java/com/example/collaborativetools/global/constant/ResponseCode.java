@@ -21,6 +21,9 @@ public enum ResponseCode {
     DELETE_BOARD(200, "보드 삭제 완료"),
     INVITE_BOARD(200, "보드 유저 초대 완료"),
     GET_MEMBER_BOARD(200, "보드 멤버 조회 완료"),
+    GET_DETAIL_BOARD(200,"보드 상세 조회 완료"),
+    DELETE_MEMBER_BOARD(200,"보드 멤버 탈퇴 완료"),
+
 
     LOGIN(200, "로그인 성공"),
     LOGOUT(200, "로그아웃 성공"),
