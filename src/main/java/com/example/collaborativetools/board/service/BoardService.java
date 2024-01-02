@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,7 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
     private final UserBoardRepository userBoardRepository;
+    private final ColumnRepository columnRepository;
 
 
     public CreateBoardDTO.Response createBoard(CreateBoardDTO.Request request, Long userId) {
@@ -119,9 +121,11 @@ public class BoardService {
 
         List<GetDetailResponseBoardDTO> responseBoardDTOList = new ArrayList<>();
 
-        List<Columns> columnsList = board.getColumnsList();
 
-        //해당 보드에 컬럼들 정보 넣기
+        List<Long> columnIds = board.getColumnsList().stream().map(Columns::getId).toList();
+        List<Columns> columnsList  = columnRepository.findColumByIdList(columnIds);
+
+//        해당 보드에 컬럼들 정보 넣기
         for (Columns columns : columnsList) {
             List<CardInColumnDTO> cardInColumnDTOList = new ArrayList<>();
 
