@@ -122,8 +122,9 @@ public class BoardService {
         List<GetDetailResponseBoardDTO> responseBoardDTOList = new ArrayList<>();
 
 
-        List<Long> columnIds = board.getColumnsList().stream().map(Columns::getId).toList();
-        List<Columns> columnsList  = columnRepository.findColumByIdList(columnIds);
+        List<Columns> columnsList = board.getColumnsList();
+//        List<Long> columnIds = board.getColumnsList().stream().map(Columns::getId).toList();
+//        List<Columns> columnsList  = columnRepository.findColumByIdList(columnIds);
 
 //        해당 보드에 컬럼들 정보 넣기
         for (Columns columns : columnsList) {

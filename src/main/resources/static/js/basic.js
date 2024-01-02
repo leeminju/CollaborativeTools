@@ -300,7 +300,6 @@ function getBoardList() {
                 $('#board_list').append(tempHtml);
                 if (i == 0) {
                     current_boardId = boardId;
-                    console.log(current_boardId);
                     showBoardDetails(boardId, title, desc1, backgroundColor);
                 }
 
@@ -353,6 +352,9 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
         type: 'GET', url: `/api/boards/${boardId}`, success: function (response) {
             let columns = response['data'];
             let last_sequence = 0;
+
+            console.log(columns);
+
             $('#column_list').empty();
 
             for (var i = 0; i < columns.length; i++) {
@@ -640,7 +642,7 @@ function addCard(columnId) {
 //컬럼 추가
 function addColumn(boardId, last_sequence) {
     let title = $('#new_column_title_input-' + boardId).val();
-    let sequence = last_sequence + 1;
+    let sequence = Number(last_sequence) + 1;
 
 
     let data = {
@@ -744,8 +746,8 @@ function showCardDetails(cardId, columnId) {
                                     <div id="${comment_id}-text" class="comment_text">
                                        ${comment_content}
                                     </div>
-                                    <div id="${comment_id}-editarea" class="edit_area">
-                                        <textarea style="width: 100%;display: none" id="${comment_id}-textarea" placeholder="댓글 내용" class="edit_textarea" name="" id="" rows="2"> ${comment_content}</textarea>
+                                    <div style="display: none" id="${comment_id}-editarea" class="edit_area">
+                                        <textarea style="width: 100%;" id="${comment_id}-textarea" placeholder="댓글 내용" class="edit_textarea" name="" id="" rows="2"> ${comment_content}</textarea>
                                     </div>
                                     <div class="d-flex justify-content-between">
                                         <div class="d-flex flex-row align-items-center">                                        
@@ -994,26 +996,28 @@ function removeCardMember(userId) {
 }
 
 //댓글 생성
-// function create_Comment() {
-//     let contents = $('#comment_text').val().replace("\r\b", "<br>");
-//
-//     let data = {"contents": contents};
-//
-//     $.ajax({
-//             type: 'POST',
-//             url: `/api/posts/${post_id}/comments`,
-//             contentType: 'application/json',
-//             data: JSON.stringify(data),
-//             success: function (response) {
-//                 alert(response['responseMessage']);
-//                 showComment(post_id);
-//             },
-//             error(error, status, request) {
-//                 alert(error['responseJSON']['responseMessage']);
-//             }
-//         }
-//     );
-// }
+function create_Comment() {
+    let columnId = current_cardInfo['columnId'];
+    let comment = $('#comment_text').val().replace("\r\b", "<br>");
+
+    let data = {"comment": comment};
+
+    $.ajax({
+            type: 'POST',
+            url: `/api/boards/${current_boardId}/columns/${columnId}/cards/${current_cardId}/comments`,
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function (response) {
+                alert(response['msg']);
+                showCardDetails(current_cardId, columnId);
+            },
+            error(error, status, request) {
+                alert(error['responseJSON']['responseMessage']);
+            }
+        }
+    );
+}
+
 //편집 버튼 누르면 -> 편집 공간 display
 function editComment(id) {
     showEdits(id);
@@ -1027,46 +1031,49 @@ function showEdits(id) {
     $(`#${id}-text`).hide();
     $(`#${id}-edit`).hide();
 }
-//댓글 삭제
-// function delete_Comment(id, post_id) {
-//     //삭제 API 호출
-//     $.ajax({
-//         type: "DELETE",
-//         url: `/api/comments/${id}`,
-//         contentType: "application/json",
-//         success: function (response) {
-//             alert(response['responseMessage']);
-//             showComment(post_id);
-//         }, error(error, status, request) {
-//             alert(error['responseJSON']['responseMessage']);
-//             showComment(post_id);
-//         }
-//
-//     });
-//
-// }
 
-// //댓글 수정 제출
-// function submitEdit(id, post_id) {
-//
-//     let contents = $(`#${id}-textarea`).val().replaceAll("<br>", "\r\n");
-//
-//     let data = {'contents': contents};
-//
-//     $.ajax({
-//         type: "PUT",
-//         url: `/api/comments/${id}`,
-//         contentType: "application/json",
-//         data: JSON.stringify(data),
-//         success: function (response) {
-//             alert(response['responseMessage']);
-//             showComment(post_id);
-//         }, error(error, status, request) {
-//             alert(error['responseJSON']['responseMessage']);
-//             showComment(post_id);
-//         }
-//
-//     });
-//
-//
-// }
+댓글
+삭제
+
+function delete_Comment(id) {
+    let columnId = current_cardInfo['columnId'];
+    //삭제 API 호출
+    $.ajax({
+        type: "DELETE",
+        url: `/api/boards/${current_boardId}/columns/${columnId}/cards/${current_cardId}/comments/${id}`,
+        success: function (response) {
+            alert(response['msg']);
+            showCardDetails(current_cardId, columnId);
+        }, error(error, status, request) {
+            alert(error['responseJSON']['msg']);
+            showCardDetails(current_cardId, columnId);
+        }
+
+    });
+
+}
+
+//댓글 수정 제출
+function submitEdit(id) {
+    let columnId = current_cardInfo['columnId'];
+    let comment = $(`#${id}-textarea`).val().replaceAll("<br>", "\r\n");
+
+    let data = {'comment': comment};
+
+    $.ajax({
+        type: "PUT",
+        url: `/api/boards/${current_boardId}/columns/${columnId}/cards/${current_cardId}/comments/${id}`,
+        contentType: "application/json",
+        data: JSON.stringify(data),
+        success: function (response) {
+            alert(response['msg']);
+            showCardDetails(current_cardId, columnId);
+        }, error(error, status, request) {
+            alert(error['responseJSON']['msg']);
+            showCardDetails(current_cardId, columnId);
+        }
+
+    });
+
+
+}
