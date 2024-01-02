@@ -2,9 +2,6 @@ package com.example.collaborativetools.column.service;
 
 import static com.example.collaborativetools.global.constant.ErrorCode.*;
 
-import java.util.List;
-
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Service
 public class ColumnService {
-	private static final Sort SORT_BY_SEQUENCE_ASC = Sort.by(Sort.Direction.ASC, "sequence");
 	private final BoardRepository boardRepository;
 	private final ColumnRepository columnRepository;
 	private final UserBoardRepository userBoardRepository;
@@ -39,8 +35,6 @@ public class ColumnService {
 
 		return ColumnResponse.from(column);
 	}
-
-
 
 	@Transactional
 	public ColumnResponse updateColumn(Long boardId, Long columnId, ColumnUpdateRequest request, User loginUser) {
@@ -59,14 +53,6 @@ public class ColumnService {
 		Columns column = findColumn(columnId);
 		columnRepository.delete(column);
 	}
-
-	public List<ColumnResponse> getColumns() {
-		return columnRepository.findAll(SORT_BY_SEQUENCE_ASC)
-			.stream()
-			.map(ColumnResponse::from)
-			.toList();
-	}
-
 
 	public Board findBoard(Long boardId) {
 		return boardRepository.findById(boardId)
