@@ -236,14 +236,27 @@
                     </div>
                 </div>
 
-                <div style="margin-top: 30px">
-                    <h4>댓글</h4>
-                </div>
-
                 <div style="margin-top:30px;">
                     <h4>배경색 설정:</h4>
                     <input type="color" value="#FFFFFF" id="update_card_background_color">
                 </div>
+
+                <div style="margin-top: 30px">
+                    <h4>댓글</h4>
+                    <div id="commentarea" style="width: 100%" class="col-md-8 col-lg-6">
+                        <div class="card shadow-0 border" style="background-color: #f0f2f5;">
+                            <div class="form-outline">
+                                <textarea style="width: 95%;margin:10px" class="input_comment" id="comment_text" placeholder="Type comment..."
+                                          rows="3"></textarea>
+                                <label style="margin-left: 10px" onclick="" class="form-label" for="comment_text">+ Add a comment</label>
+                            </div>
+                            <div id="comment-card" class="card-body">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
 
             <div class="modal-footer">

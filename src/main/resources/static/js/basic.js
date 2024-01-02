@@ -715,6 +715,8 @@ function showCardDetails(cardId, columnId) {
             let members = card['members'];
 
             $('#card_member_list').empty();
+            $('#comment-card').empty();
+
             for (var i = 0; i < members.length; i++) {
                 let member = members[i];
                 let id = member['id'];
@@ -726,6 +728,42 @@ function showCardDetails(cardId, columnId) {
                         </li>`;
 
                 $('#card_member_list').append(dropdown_item);
+            }
+
+
+            for (var i = 0; i < comments.length; i++) {
+                let comment = comments[i];
+
+                let comment_id = comment['id'];
+                let createdAt = comment['createdAt'];
+                let writer = comment['writer'];
+                let comment_content = comment['comment'];
+
+                let tempHTML = `<div class="card mb-4">
+                                <div class="card-body">
+                                    <div id="${comment_id}-text" class="comment_text">
+                                       ${comment_content}
+                                    </div>
+                                    <div id="${comment_id}-editarea" class="edit_area">
+                                        <textarea style="width: 100%;display: none" id="${comment_id}-textarea" placeholder="댓글 내용" class="edit_textarea" name="" id="" rows="2"> ${comment_content}</textarea>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="d-flex flex-row align-items-center">                                        
+                                            <p class="small mb-0 ms-2">${writer}</p>
+                                        </div>
+                                        <div class="d-flex flex-row align-items-center">
+                                            <p class="small text-muted mb-0">${createdAt}</p>
+                                        </div>    
+                                    </div>
+                                    <div class="footer" style="float: right">
+                                            <img id="${comment_id}-edit" class="icon-start-edit" src="images/edit.png" alt="" onclick="editComment('${comment_id}')">
+                                            <img id="${comment_id}-delete" class="icon-delete" src="images/delete.png" alt="" onclick="delete_Comment('${comment_id}')">
+                                            <img id="${comment_id}-submit" class="icon-end-edit" src="images/done.png" alt="" onclick="submitEdit('${comment_id}')">
+                                    </div>
+                                </div>
+                            </div>`;
+
+                $('#comment-card').append(tempHTML);
             }
 
             if (dueDate != null) {
@@ -954,3 +992,81 @@ function removeCardMember(userId) {
         }
     });
 }
+
+//댓글 생성
+// function create_Comment() {
+//     let contents = $('#comment_text').val().replace("\r\b", "<br>");
+//
+//     let data = {"contents": contents};
+//
+//     $.ajax({
+//             type: 'POST',
+//             url: `/api/posts/${post_id}/comments`,
+//             contentType: 'application/json',
+//             data: JSON.stringify(data),
+//             success: function (response) {
+//                 alert(response['responseMessage']);
+//                 showComment(post_id);
+//             },
+//             error(error, status, request) {
+//                 alert(error['responseJSON']['responseMessage']);
+//             }
+//         }
+//     );
+// }
+//편집 버튼 누르면 -> 편집 공간 display
+function editComment(id) {
+    showEdits(id);
+}
+
+function showEdits(id) {
+    $(`#${id}-editarea`).show();
+    $(`#${id}-submit`).show();
+    $(`#${id}-delete`).show();
+
+    $(`#${id}-text`).hide();
+    $(`#${id}-edit`).hide();
+}
+//댓글 삭제
+// function delete_Comment(id, post_id) {
+//     //삭제 API 호출
+//     $.ajax({
+//         type: "DELETE",
+//         url: `/api/comments/${id}`,
+//         contentType: "application/json",
+//         success: function (response) {
+//             alert(response['responseMessage']);
+//             showComment(post_id);
+//         }, error(error, status, request) {
+//             alert(error['responseJSON']['responseMessage']);
+//             showComment(post_id);
+//         }
+//
+//     });
+//
+// }
+
+// //댓글 수정 제출
+// function submitEdit(id, post_id) {
+//
+//     let contents = $(`#${id}-textarea`).val().replaceAll("<br>", "\r\n");
+//
+//     let data = {'contents': contents};
+//
+//     $.ajax({
+//         type: "PUT",
+//         url: `/api/comments/${id}`,
+//         contentType: "application/json",
+//         data: JSON.stringify(data),
+//         success: function (response) {
+//             alert(response['responseMessage']);
+//             showComment(post_id);
+//         }, error(error, status, request) {
+//             alert(error['responseJSON']['responseMessage']);
+//             showComment(post_id);
+//         }
+//
+//     });
+//
+//
+// }
