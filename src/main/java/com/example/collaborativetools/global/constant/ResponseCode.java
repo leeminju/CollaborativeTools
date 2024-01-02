@@ -11,6 +11,7 @@ public enum ResponseCode {
     GET_COLUMNS(200, "컬럼 조회 완료"),
     UPDATED_COLUMNS(200, "컬럼 수정 완료"),
     DELETED_COLUMNS(200, "컬럼 삭제 완료"),
+    REORDER_COLUMNS(200, "컬럼 재정렬 완료"),
 
     UPDATED_COMMENT(200, "댓글 수정 완료"),
     DELETED_COMMENT(200, "댓글 삭제 완료"),

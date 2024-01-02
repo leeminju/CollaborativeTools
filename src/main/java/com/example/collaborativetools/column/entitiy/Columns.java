@@ -23,6 +23,7 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @NoArgsConstructor
@@ -37,6 +38,7 @@ public class Columns extends Timestamped {
     private String title;
 
     @Column(nullable = false)
+    @Setter
     private Double sequence;
 
     @ManyToOne
