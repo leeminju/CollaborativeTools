@@ -30,8 +30,8 @@ public class ColumnService {
 	private final UserBoardRepository userBoardRepository;
 
 	@Transactional
-	public ColumnResponse createColumn(ColumnCreateRequest request, User loginUser) {
-		Board board = boardRepository.findById(request.getBoardId())
+	public ColumnResponse createColumn(Long boardId, ColumnCreateRequest request, User loginUser) {
+		Board board = boardRepository.findById(boardId)
 			.orElseThrow(() -> new ApiException(NOT_FOUND_BOARD));
 
 		checkUserPermission(board.getId(), loginUser.getId());
@@ -42,8 +42,8 @@ public class ColumnService {
 	}
 
 	@Transactional
-	public ColumnResponse updateColumn(Long columnId, ColumnUpdateRequest request, User loginUser) {
-		Board board = boardRepository.findById(request.getBoardId())
+	public ColumnResponse updateColumn(Long boardId, Long columnId, ColumnUpdateRequest request, User loginUser) {
+		Board board = boardRepository.findById(boardId)
 			.orElseThrow(() -> new ApiException(NOT_FOUND_BOARD));
 
 		checkUserPermission(board.getId(), loginUser.getId());

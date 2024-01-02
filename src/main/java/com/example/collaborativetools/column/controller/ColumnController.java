@@ -27,19 +27,20 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/columns")
+@RequestMapping("/api/boards/{boardId}/columns")
 @RestController
-public class ColumnApiController {
+public class ColumnController {
 	private final ColumnService columnService;
 
 	//컬럼생성
 	@PostMapping
 	public ResponseEntity<BaseResponse<ColumnResponse>> createColumn(
+		@PathVariable Long boardId,
 		@Valid @RequestBody ColumnCreateRequest request,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 	) {
 		User user = userDetails.getUser();
-		ColumnResponse response = columnService.createColumn(request, user);
+		ColumnResponse response = columnService.createColumn(boardId, request, user);
 		return ResponseEntity.status(CREATED_COLUMNS.getHttpStatus())
 			.body(
 				BaseResponse.of(
@@ -49,28 +50,16 @@ public class ColumnApiController {
 			);
 	}
 
-	//컬럼리스트 + 카드포함 조회
-	@GetMapping
-	public ResponseEntity<BaseResponse<List<ColumnResponse>>> getColumns() {
-		List<ColumnResponse> response = columnService.getColumns();
-		return ResponseEntity.status(GET_COLUMNS.getHttpStatus())
-			.body(
-				BaseResponse.of(
-					GET_COLUMNS,
-					response
-				)
-			);
-	}
-
 	//컬럼수정
 	@PutMapping("/{columnId}")
 	public ResponseEntity<BaseResponse<ColumnResponse>> updateColumn(
+		@PathVariable Long boardId,
 		@PathVariable Long columnId,
 		@Valid @RequestBody ColumnUpdateRequest request,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 	) {
 		User user = userDetails.getUser();
-		ColumnResponse response = columnService.updateColumn(columnId, request, user);
+		ColumnResponse response = columnService.updateColumn(boardId, columnId, request, user);
 		return ResponseEntity.status(UPDATED_COLUMNS.getHttpStatus())
 			.body(
 				BaseResponse.of(
@@ -82,7 +71,9 @@ public class ColumnApiController {
 
 	//컬럼삭제
 	@DeleteMapping("/{columnId}")
-	public ResponseEntity<BaseResponse<Void>> deleteColumn(@PathVariable Long columnId) {
+	public ResponseEntity<BaseResponse<Void>> deleteColumn(
+		@PathVariable Long columnId
+	) {
 		columnService.deleteColumn(columnId);
 
 		return ResponseEntity.status(DELETED_COLUMNS.getHttpStatus())

@@ -36,7 +36,7 @@ import com.example.collaborativetools.user.entitiy.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @DisplayName("컬럼 API 컨트롤러 테스트")
-@WebMvcTest(controllers = ColumnApiController.class,
+@WebMvcTest(controllers = ColumnController.class,
 	excludeFilters = {
 		@ComponentScan.Filter(
 			type = FilterType.ASSIGNABLE_TYPE,
@@ -83,10 +83,10 @@ class ColumnControllerTest {
 		this.mockUserSetup();
 		Long columnId = 1L;
 
-		ColumnCreateRequest request = new ColumnCreateRequest(BOARD_ID, "테스트", 1);
-		Columns column = getColumn(request, columnId);
+		ColumnCreateRequest request = new ColumnCreateRequest( "테스트", 1);
+		Columns column = getColumn(BOARD_ID, request, columnId);
 
-		given(columnService.createColumn(any(), any())).willReturn(
+		given(columnService.createColumn(any(), any(), any())).willReturn(
 			ColumnResponse.from(column)
 		);
 
@@ -104,11 +104,11 @@ class ColumnControllerTest {
 			.andExpect(status().isCreated());
 	}
 
-	private static Columns getColumn(ColumnCreateRequest request, Long columnId) {
+	private static Columns getColumn(Long boardId, ColumnCreateRequest request, Long columnId) {
 		Columns column = Columns.create(
 			request.getTitle(),
 			request.getSequence(),
-			getBoard(request.getBoardId())
+			getBoard(boardId)
 		);
 		ReflectionTestUtils.setField(column, "id", columnId);
 		return column;
