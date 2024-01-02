@@ -1,9 +1,15 @@
 package com.example.collaborativetools.card.service;
 
+import java.util.List;
+import java.util.Optional;
+
+import com.example.collaborativetools.card.dto.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
 import com.example.collaborativetools.board.entitiy.Board;
 import com.example.collaborativetools.board.repository.BoardRepository;
 import com.example.collaborativetools.board.service.BoardService;
-import com.example.collaborativetools.card.Dto.*;
 import com.example.collaborativetools.card.entitiy.Card;
 import com.example.collaborativetools.card.repository.CardRepository;
 import com.example.collaborativetools.column.entitiy.Columns;
@@ -18,17 +24,14 @@ import com.example.collaborativetools.userboard.entity.UserBoard;
 import com.example.collaborativetools.userboard.repository.UserBoardRepository;
 import com.example.collaborativetools.usercard.entity.UserCard;
 import com.example.collaborativetools.usercard.repository.UserCardRepository;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class CardService {
+
     private final CardRepository cardRepository;
     private final UserCardRepository userCardRepository;
     private final ColumnsRepository columnsRepository;
@@ -43,9 +46,8 @@ public class CardService {
         Columns columns = checkColumn(columnId);
 
         //보드 유저 확인
-
         validateUserInvitation(boards.getId(), user.getId());
-      
+
         Integer lastSequence = cardRepository.findLastSequenceInColumn(columns.getId());
         if (lastSequence == null) lastSequence = 0;
 
@@ -66,7 +68,6 @@ public class CardService {
         Card card = cardRepository.findById(cardId).orElseThrow(() -> new NullPointerException("존재하지 않는 카드입니다"));
         Board boards = checkBoard(boardId);
         checkColumn(columnId);
-
         //보드 유저 확인
         validateUserInvitation(boards.getId(), user.getId());
 
@@ -85,11 +86,12 @@ public class CardService {
 
         }
         return BaseResponse.of("보드멤버가 아닙니다", HttpStatus.CONFLICT.value(), null);
-
     }
 
+
     @Transactional
-    public BaseResponse<Card> updateCard(Long boardId, Long columnId, Long cardId, CardUpdateRequestDto cardUpdateDto, User user) {
+    public BaseResponse<Card> updateCard(Long boardId, Long columnId, Long cardId, CardUpdateRequestDto
+            cardUpdateDto, User user) {
         Board boards = checkBoard(boardId);
         checkColumn(columnId);
 
@@ -101,6 +103,7 @@ public class CardService {
 
         return BaseResponse.of("카드가 수정되었습니다", HttpStatus.OK.value(), card);
     }
+
 
     @Transactional
     public BaseResponse<String> deleteCard(Long boardId, Long columnId, Long cardId, User user) {
@@ -116,6 +119,7 @@ public class CardService {
         return BaseResponse.of(ResponseCode.DELETED_CARD, null);
     }
 
+
     public BaseResponse<CardResponseDto> getCard(Long boardId, Long columnId, Long cardId, User user) {
         Board boards = checkBoard(boardId);
         checkColumn(columnId);
@@ -128,51 +132,83 @@ public class CardService {
         return BaseResponse.of("카드를 조회하였습니다", HttpStatus.OK.value(), new CardResponseDto(card));
     }
 
+
     @Transactional
-    public BaseResponse<Card> changeCardSequence(Long boardId, Long columnId, Long cardId, CardSequenceDto cardSequenceDto, User user) {
+    public BaseResponse<Card> changeCardSequence(Long boardId, Long columnId, Long
+            cardId, CardSequenceDto cardSequenceDto, User user) {
         Board boards = checkBoard(boardId);
         checkColumn(columnId);
-
-        //보드 유저 확인
-        validateUserInvitation(boards.getId(), user.getId());
 
         Card card = cardRepository.findById(cardId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_CARD));
         int newSequence = cardSequenceDto.getSequence();
         int currentSequence = card.getSequence();
+        long currentColumnId = card.getColumn().getId();
 
-        long totalCards = cardRepository.count();
-        int maxSequence = (int) totalCards;
+        //보드 유저 확인
+        validateUserInvitation(boards.getId(), user.getId());
 
-        // 변경하려는 순서가 총 갯수를 넘어가면 최대 순서로 변경
-        if (newSequence > maxSequence) {
-            newSequence = maxSequence;
-        }
+        //대분류 같은 컬럼에서 이동할 때 / 컬럼 이동할 때
+        Columns column = columnsRepository.findById(cardSequenceDto.getColumnId())
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_COLUMN));
 
+        card.setColumn(column);
         card.setSequence(newSequence);
         cardRepository.save(card);
 
         List<Card> cardsToChange;
+        //같은 컬럼에서 이동할 때
+        // 변경하려는 순서가 총 갯수를 넘어가면 최대 순서로 변경
+        if (currentColumnId == cardSequenceDto.getColumnId()) {
+            long totalCards = cardRepository.count();
+            int maxSequence = (int) totalCards;
 
-        // 순서를 뒤로 옮길 때
-        if (currentSequence < newSequence) {
-            cardsToChange = cardRepository.findBySequenceBetweenOrderBySequence(currentSequence + 1, newSequence);
-            for (Card c : cardsToChange) {
-                if (c.getId().equals(card.getId())) continue; // 변경 대상 카드는 제외시켜줌
-                c.setSequence(c.getSequence() - 1);
+            if (newSequence > maxSequence) {
+                newSequence = maxSequence;
             }
-        }
-        // 순서를 앞으로 옮길 때
-        else if (currentSequence > newSequence) {
-            cardsToChange = cardRepository.findBySequenceBetweenOrderBySequence(newSequence, currentSequence - 1);
+
+            // 순서를 뒤로 옮길 때
+            if (currentSequence < newSequence) {
+                cardsToChange = cardRepository.findByColumnIdAndSequenceBetweenOrderBySequence(column.getId(),
+                        currentSequence + 1, newSequence);
+                for (Card c : cardsToChange) {
+                    if (c.getId().equals(card.getId()))
+                        continue; // 변경 대상 카드는 제외시켜줌
+                    c.setSequence(c.getSequence() - 1);
+                }
+            }
+            // 순서를 앞으로 옮길 때
+            else if (currentSequence > newSequence) {
+                cardsToChange = cardRepository.findByColumnIdAndSequenceBetweenOrderBySequence(column.getId(),
+                        newSequence,
+                        currentSequence - 1);
+                for (Card c : cardsToChange) {
+                    if (c.getId().equals(card.getId()))
+                        continue; // 변경 대상 카드는 제외시켜줌
+                    c.setSequence(c.getSequence() + 1);
+                }
+            } else
+                return BaseResponse.of("변경하고자 하는 카드의 순서가 같습니다", HttpStatus.OK.value(), card);
+        } else { // 다른컬럼으로 이동하는 경우 이동한 시퀀스 부터 쭉 밀기
+            //기존에 있었던 컬럼 재정렬
+            List<Card> cards = cardRepository.findByColumnId(currentColumnId);
+
+            if (!cards.isEmpty()) {
+                int seq = 1;
+                for (Card c : cards) {
+                    c.setSequence(seq++);
+                }
+            }
+            //옮긴 시퀀스 부터 쭉 밀기
+            int size = cardRepository.countByColumnId(column.getId());
+            cardsToChange = cardRepository.findByColumnIdAndSequenceBetweenOrderBySequence(column.getId(),
+                    newSequence, size);
             for (Card c : cardsToChange) {
-                if (c.getId().equals(card.getId())) continue; // 변경 대상 카드는 제외시켜줌
+                if (c.getId().equals(card.getId()))
+                    continue; // 변경 대상 카드는 제외시켜줌
                 c.setSequence(c.getSequence() + 1);
             }
-        } else
-            return BaseResponse.of("변경하고자 하는 카드의 순서가 같습니다", HttpStatus.OK.value(), card);
+        }
 
-
-        cardRepository.saveAll(cardsToChange);
 
         return BaseResponse.of("카드 순서를 변경하였습니다", HttpStatus.OK.value(), card);
     }

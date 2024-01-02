@@ -15,8 +15,6 @@ $(document).ready(function () {
     });
     authorizationCheck();//인가
     getBoardList();
-
-
 })
 
 $('html').click(function (e) {
@@ -56,6 +54,106 @@ function updateColumn(prev_columnId) {
         },
         error(error, status, request) {
             console.log(error);
+        }
+    });
+}
+
+//드래깅 대상 생성
+const dragger = {
+    init(target, options) {
+        return dragula(
+            [
+                ...target // 해당 리스트의 아이템을 드래그 가능하게 만듦
+            ],
+            options
+        );
+    },
+    setSiblings({el, target, items, type}) {
+        // 계산에 사용할 앞과 뒤의 카드 선언
+        let prev = null;
+        let next = null;
+
+        console.log("itemlist");
+        console.log(items)
+        items.forEach((item, index, arr) => {
+            console.log("index ->" + index);
+            console.log(item)
+            // 리스트의 아이템들을 순환
+            if (item.dataset[type + "Id"] * 1 === el.dataset[type + "Id"] * 1) {
+                console.log("cardId" + item.dataset[type + "Id"])
+                // 현재 드래그하는 카드일 경우
+                prev = index > 0 ? arr[index - 1] : null; // 맨 위가 아닐 경우 이전 아이템 할당
+                next = index < arr.length - 1 ? arr[index + 1] : null; // 맨 아래가 아닐 경우 다음 아이템 할당
+            }
+        });
+
+        return {prev, next};
+    }
+};
+
+function setCardDraggable() {
+    if (this.dragulaCard) this.dragulaCard.destroy();
+
+    const options = {};
+    let cardList = Array.from(document.querySelectorAll(".list-group"));
+    console.log(cardList)
+    this.dragulaCard = dragger.init(
+        Array.from(document.querySelectorAll(".list-group")),
+        options
+    );
+
+    this.dragulaCard.on("drop", (el, target, source, sibling) => {
+        // 이벤트 리스너 등록(el은 드래그하는 요소, target은 위에서 등록한 리스트)
+        console.log("el")
+        console.log(sibling)
+        const targetCard = {
+            id: el.dataset.cardId * 1,
+            columnId: target.parentNode.dataset.columnId * 1,
+            sequence: el.dataset.sequence * 1
+        }; // api업데이트시 쓰일 객체 생성
+
+        const {prev, next} = dragger.setSiblings({
+            el,
+            target,
+            items: target.querySelectorAll(".list-group-item"),
+            type: "card"
+        });
+
+        // 자리가 맨 위일 경우
+        console.log("prev");
+        console.log(prev);
+        console.log("next");
+        console.log(next)
+        if (!prev && next) targetCard.sequence = 1;
+        // 자리가 사이일 경우
+        else if (prev && next) {
+            let temp = targetCard.sequence;
+            console.log("silbing")
+            console.log(sibling)
+            targetCard.sequence = (next.dataset.sequence * 1);
+            //sibling.sequence = temp;
+        }
+        // 자리가 맨 아래일 경우
+        else if (prev && !next) targetCard.sequence = (prev.dataset.sequence * 1) + 1;
+
+        this.updateCardsequence(targetCard);
+    });
+}
+
+function updateCardsequence(card) {
+    console.log("update card")
+    $.ajax({
+        type: 'PUT',
+        url: `/api/boards/${current_boardId}/columns/${card.columnId}/cards/${card.id}/sequence`,
+        contentType: 'application/json',
+        data: JSON.stringify(card),
+        success: function (response) {
+            console.log(response);
+            alert(response['msg']);
+            win_reload();
+        },
+        error(error, status, request) {
+            alert(card)
         }
     });
 }
@@ -260,10 +358,10 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
                 let columnId = column['columnId'];
                 let title = column['columnTitle'];
                 let sequence = column['sequence'];
-
                 let cards = column['cardTitleList'];
                 last_sequence = column['sequence'];
-                let html = `<div class="card text-dark bg-light mb-3" style="height:fit-content; max-width:18rem; width: 18rem; margin: 10px">
+
+                let html = `<div class="card text-dark bg-light mb-3" style="height:fit-content; max-width:18rem; width: 18rem; margin: 10px" xmlns="http://www.w3.org/1999/html">
                                         <div class="card-header">
                                         <span onclick="showEditTitle('${columnId}','${sequence}')" id="colum_title-${columnId}">${title}</span>
                                         <input class = "column_title_input" style="display: none;width: 75%" value="${title}" id="column_title_input-${columnId}">
@@ -276,8 +374,9 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
     </ul>
                                             </div>
                                          </div>
-                                          <div class="card-body">
+                                          <div class="card-body" data-column-id="${columnId}" data-sequence="${sequence}">
                                                 <ul class="list-group list-group-flush" id="card_list-${columnId}">
+                                                <br></br>
                                                  </ul>
                                                 <button id="add_card_btn-${columnId}" onclick="showCardTitleArea(${columnId})" style="width:100%;border: transparent;background-color: transparent">+ Add a card</button>
                                                      
@@ -295,11 +394,13 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
                     let cardId = card['cardId'];
                     let cardTitle = card['cardTitle'];
                     let backgroundColor = card['backgroundColor'];
+                    let sequence = card['sequence'];
+                    let html = `<li class="list-group-item" onclick="showCardDetails('${cardId}','${columnId}')"  data-bs-toggle="modal" data-bs-target="#CardModal"
+                    style="background-color: ${backgroundColor};border: grey solid 1px; border-radius: 10px;margin-bottom: 8px" data-card-id="${cardId}" data-sequence=${sequence}>
+                            ${cardTitle}
+                        </li>`;
+                    console.log($("#card_list-" + columnId).children('br').remove())
 
-
-                    let html = `<li class="list-group-item"  onclick="showCardDetails('${cardId}','${columnId}')"  
-                    data-bs-toggle="modal" data-bs-target="#CardModal"
-                    style="background-color: ${backgroundColor};border: grey solid 1px; border-radius: 10px;margin-bottom: 8px">${cardTitle}</li>`;
                     $("#card_list-" + columnId).append(html);
                 }
 
@@ -308,7 +409,7 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
             let html = `<div class="card text-dark bg-light mb-3" style="height:fit-content; max-width:18rem; width: 18rem; margin: 10px">                                    
                                           <div class="card-body">
                                                <button id="add_list_btn-${boardId}"onclick="showColumnTitleArea('${boardId}')" style="width:100%;border: transparent;background-color: transparent">+ Add another list</button>
-                                               <input  id="column_title_input-${boardId}" placeholder="리스트 제목을 입력하세요"
+                                               <input  id="new_column_title_input-${boardId}" placeholder="리스트 제목을 입력하세요"
                                                 style="display:none;width: 100%"
                                                 >      
                                                <span>
@@ -319,6 +420,7 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
                                         </div>`
             $('#column_list').append(html);
 
+            setCardDraggable();
         }, error(error, status, request) {
             alert(error['msg']);
         }
@@ -327,17 +429,19 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
 
 //리스트 추가 시 제목 입력 보이게
 function showColumnTitleArea(boardId) {
+    console.log("컬럼 제목 입력 보이기")
     $('#add_list_btn-' + boardId).hide();
 
-    $('#column_title_input-' + boardId).show();
+    $('#new_column_title_input-' + boardId).show();
     $('#add_list_btn2-' + boardId).show();
     $('#close_add_list_btn-' + boardId).show();
 }
 
 function hideColumnTitleArea(boardId) {
+    console.log("컬럼 제목 입력 숨기기")
     $('#add_list_btn-' + boardId).show();
 
-    $('#column_title_input-' + boardId).hide();
+    $('#new_column_title_input-' + boardId).hide();
     $('#add_list_btn2-' + boardId).hide();
     $('#close_add_list_btn-' + boardId).hide();
 }
@@ -529,7 +633,7 @@ function addCard(columnId) {
 }
 
 function addColumn(boardId, last_sequence) {
-    let title = $('#column_title_input-' + boardId).val();
+    let title = $('#new_column_title_input-' + boardId).val();
     let sequence = last_sequence + 1;
 
 
@@ -651,7 +755,7 @@ function saveCardDescription() {
         contentType: 'application/json',
         data: JSON.stringify(data),
         success: function (response) {
-            showCardDetails(current_cardId,columnId)
+            showCardDetails(current_cardId, columnId)
         },
         error(error, status, request) {
             console.log(error);
@@ -695,7 +799,7 @@ function updateCardTitle() {
             $('#card_title_input').hide().val(title);
             $('#card_title').show().text(title);
             edit_card_title = false;
-            showCardDetails(current_cardId,columnId)
+            showCardDetails(current_cardId, columnId)
         },
         error(error, status, request) {
             console.log(error);
@@ -724,7 +828,7 @@ function saveDueDate() {
         success: function (response) {
             $('#card_due_date_input').val(dueDate);
             $('#card_due_date').text(dueDate);
-            showCardDetails(current_cardId,columnId)
+            showCardDetails(current_cardId, columnId)
         },
         error(error, status, request) {
             console.log(error);
@@ -739,7 +843,7 @@ function removeCard() {
         url: `/api/boards/${current_boardId}/columns/${columnId}/cards/${current_cardId}`,
         success: function (response) {
             alert(response['msg'])
-            showBoardDetails(current_boardId,columnId)
+            showBoardDetails(current_boardId, columnId)
         },
         error(error, status, request) {
             alert(error['responseJSON']['msg'])

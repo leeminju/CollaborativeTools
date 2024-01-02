@@ -1,4 +1,4 @@
-package com.example.collaborativetools.card.Dto;
+package com.example.collaborativetools.card.dto;
 
 import lombok.Getter;
 
