@@ -16,7 +16,7 @@ import com.example.collaborativetools.card.dto.InviteDto;
 import com.example.collaborativetools.card.entitiy.Card;
 import com.example.collaborativetools.card.repository.CardRepository;
 import com.example.collaborativetools.column.entitiy.Columns;
-import com.example.collaborativetools.column.repository.ColumnsRepository;
+import com.example.collaborativetools.column.repository.ColumnRepository;
 import com.example.collaborativetools.global.constant.ErrorCode;
 import com.example.collaborativetools.global.constant.ResponseCode;
 import com.example.collaborativetools.global.dto.BaseResponse;
@@ -36,14 +36,14 @@ import lombok.RequiredArgsConstructor;
 public class CardService {
 	private final CardRepository cardRepository;
 	private final UserCardRepository userCardRepository;
-	private final ColumnsRepository columnsRepository;
+	private final ColumnRepository columnRepository;
 	private final UserRepository userRepository;
 	private final UserBoardRepository userBoardRepository;
 	private final BoardService boardService;
 
 	public BaseResponse<Card> addCard(Long columnId, CardRequestDto cardRequestDto, User user) {
 
-		Columns columns = columnsRepository.findById(columnId)
+		Columns columns = columnRepository.findById(columnId)
 			.orElseThrow(() -> new NullPointerException("존재하지 않는 컬럼입니다"));
 
 		//보드 유저 확인
@@ -119,7 +119,7 @@ public class CardService {
 		long currentColumnId = card.getColumn().getId();
 
 		//대분류 같은 컬럼에서 이동할 때 / 컬럼 이동할 때
-		Columns column = columnsRepository.findById(cardSequenceDto.getColumnId())
+		Columns column = columnRepository.findById(cardSequenceDto.getColumnId())
 			.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_COLUMN));
 
 		card.setColumn(column);
