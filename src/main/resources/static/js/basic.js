@@ -53,7 +53,7 @@ function updateColumnTitle(prev_columnId) {
             prev_columnId = -1;
         },
         error(error, status, request) {
-            console.log(error);
+            (error);
         }
     });
 }
@@ -73,14 +73,14 @@ const dragger = {
         let prev = null;
         let next = null;
 
-        console.log("itemlist");
-        console.log(items)
+        ("itemlist");
+        (items)
         items.forEach((item, index, arr) => {
-            console.log("index ->" + index);
-            console.log(item)
+            ("index ->" + index);
+            (item)
             // 리스트의 아이템들을 순환
             if (item.dataset[type + "Id"] * 1 === el.dataset[type + "Id"] * 1) {
-                console.log("cardId" + item.dataset[type + "Id"])
+                ("cardId" + item.dataset[type + "Id"])
                 // 현재 드래그하는 카드일 경우
                 prev = index > 0 ? arr[index - 1] : null; // 맨 위가 아닐 경우 이전 아이템 할당
                 next = index < arr.length - 1 ? arr[index + 1] : null; // 맨 아래가 아닐 경우 다음 아이템 할당
@@ -96,7 +96,7 @@ function setCardDraggable() {
 
     const options = {};
     let cardList = Array.from(document.querySelectorAll(".list-group"));
-    console.log(cardList)
+    (cardList)
     this.dragulaCard = dragger.init(
         Array.from(document.querySelectorAll(".list-group")),
         options
@@ -104,8 +104,6 @@ function setCardDraggable() {
 
     this.dragulaCard.on("drop", (el, target, source, sibling) => {
         // 이벤트 리스너 등록(el은 드래그하는 요소, target은 위에서 등록한 리스트)
-        console.log("el")
-        console.log(sibling)
         const targetCard = {
             id: el.dataset.cardId * 1,
             columnId: target.parentNode.dataset.columnId * 1,
@@ -120,36 +118,72 @@ function setCardDraggable() {
         });
 
         // 자리가 맨 위일 경우
-        console.log("prev");
-        console.log(prev);
-        console.log("next");
-        console.log(next)
         if (!prev && next) targetCard.sequence = 1;
         // 자리가 사이일 경우
         else if (prev && next) {
             let temp = targetCard.sequence;
-            console.log("silbing")
-            console.log(sibling)
             targetCard.sequence = (next.dataset.sequence * 1);
             //sibling.sequence = temp;
         }
         // 자리가 맨 아래일 경우
         else if (prev && !next) targetCard.sequence = (prev.dataset.sequence * 1) + 1;
 
-        this.updateCardsequence(targetCard);
+        this.updateCardSequence(targetCard);
     });
 }
 
-//카드 순서 변경
-function updateCardsequence(card) {
-    console.log("update card")
+function setColumnDraggable() {
+    if (this.dragulaColumn) this.dragulaColumn.destroy();
+    const options = {
+        invalid: (el, handle) => {
+            return /^add_list_btn/.test(handle.id); // 클릭한 요소(handle)의 클래스가 list로 시작하는지 test()해서 true false 반환
+        },
+        revertOnSpill: true
+    }
+    
+    this.dragulaColumn = dragger.init(
+        Array.from(document.querySelectorAll(".colum_list")),
+        options
+    );
+
+    this.dragulaColumn.on("drop", (el, target, source, sibling) => {
+        // 이벤트 리스너 등록(el은 드래그하는 요소, target은 위에서 등록한 리스트)
+        const targetColumn = {
+            id: el.dataset.columnId * 1,
+            title: el.dataset.title,
+            sequence: 65535
+        }; // api업데이트시 쓰일 객체 생성
+
+        const {prev, next} = dragger.setSiblings({
+            el,
+            target,
+            items: target.querySelectorAll(".card"),
+            type: "column"
+        });
+
+        // 자리가 맨 위일 경우
+        if (!prev && next) targetColumn.sequence = next.dataset.sequence / 2;
+        // 자리가 사이일 경우
+        else if (prev && next)
+            targetColumn.sequence =( prev.dataset.sequence * 1) + next.dataset.sequence / 2;
+        // 자리가 맨 아래일 경우
+        else if (prev && !next) targetColumn.sequence = prev.dataset.sequence * 2;
+
+        if (isNaN(target.sequence)) {
+            win_reload()
+        } else {
+            this.updateColumnSequence(targetColumn);
+        }
+    });
+}
+
+function updateCardSequence(card) {
     $.ajax({
         type: 'PUT',
         url: `/api/boards/${current_boardId}/columns/${card.columnId}/cards/${card.id}/sequence`,
         contentType: 'application/json',
         data: JSON.stringify(card),
         success: function (response) {
-            console.log(response);
             alert(response['msg']);
             win_reload();
         },
@@ -158,6 +192,23 @@ function updateCardsequence(card) {
         }
     });
 }
+
+function updateColumnSequence(column) {
+    $.ajax({
+        type: 'PUT',
+        url: `/api/boards/${current_boardId}/columns/${column.id}`,
+        contentType: 'application/json',
+        data: JSON.stringify(column),
+        success: function (response) {
+            alert(response['msg']);
+            win_reload();
+        },
+        error(error, status, request) {
+            alert(column)
+        }
+    });
+}
+
 
 // 인가 : 토큰 유효성 판단
 function authorizationCheck() {
@@ -188,7 +239,6 @@ function authorizationCheck() {
     });
 }
 
-//쿠키 삭제
 function CookieRemove() {
     Cookies.remove('Authorization', {path: '/'});
     Cookies.remove('RefreshToken', {path: '/'});
@@ -204,7 +254,7 @@ function logout() {
             alert(response['msg']);
             CookieRemove();
         }, error(error, status, request) {
-            console.log(error);
+            (error);
         }
     });
 
@@ -353,7 +403,7 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
             let columns = response['data'];
             let last_sequence = 0;
 
-            console.log(columns);
+            (columns);
 
             $('#column_list').empty();
 
@@ -365,7 +415,7 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
                 let cards = column['cardTitleList'];
                 last_sequence = column['sequence'];
 
-                let html = `<div class="card text-dark bg-light mb-3" style="height:fit-content; max-width:18rem; width: 18rem; margin: 10px" xmlns="http://www.w3.org/1999/html">
+                let html = `<div id="cards" class="card text-dark bg-light mb-3" style="height:fit-content; max-width:18rem; width: 18rem; margin: 10px" xmlns="http://www.w3.org/1999/html" data-column-id="${columnId}" data-sequence="${sequence}" data-title="${title}">
                                         <div class="card-header">
                                         <span onclick="showEditTitle('${columnId}','${sequence}')" id="colum_title-${columnId}">${title}</span>
                                         <input class = "column_title_input" style="display: none;width: 75%" value="${title}" id="column_title_input-${columnId}">
@@ -378,8 +428,8 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
     </ul>
                                             </div>
                                          </div>
-                                          <div class="card-body" data-column-id="${columnId}" data-sequence="${sequence}">
-                                                <ul class="list-group list-group-flush" id="card_list-${columnId}">
+                                          <div class="card-body" ">
+                                                <ul class="card-list list-group list-group-flush" id="card_list-${columnId}">
                                                 <br></br>
                                                  </ul>
                                                 <button id="add_card_btn-${columnId}" onclick="showCardTitleArea(${columnId})" style="width:100%;border: transparent;background-color: transparent">+ Add a card</button>
@@ -391,6 +441,7 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
                                                 </span>
                                             </div>
                                         </div>`
+
                 $('#column_list').append(html);
 
                 for (var j = 0; j < cards.length; j++) {
@@ -403,8 +454,7 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
                     style="background-color: ${backgroundColor};border: grey solid 1px; border-radius: 10px;margin-bottom: 8px" data-card-id="${cardId}" data-sequence=${sequence}>
                             ${cardTitle}
                         </li>`;
-                    console.log($("#card_list-" + columnId).children('br').remove())
-
+                    $("#card_list-" + columnId).children('br').remove()
                     $("#card_list-" + columnId).append(html);
                 }
 
@@ -425,6 +475,7 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
             $('#column_list').append(html);
 
             setCardDraggable();
+            setColumnDraggable();
         }, error(error, status, request) {
             alert(error['msg']);
         }
@@ -433,7 +484,7 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
 
 //컬럼 추가 시 제목 입력 보이게
 function showColumnTitleArea(boardId) {
-    console.log("컬럼 제목 입력 보이기")
+    ("컬럼 제목 입력 보이기")
     $('#add_list_btn-' + boardId).hide();
 
     $('#new_column_title_input-' + boardId).show();
@@ -443,7 +494,7 @@ function showColumnTitleArea(boardId) {
 
 //컬럼 제목 입력칸 숨기기
 function hideColumnTitleArea(boardId) {
-    console.log("컬럼 제목 입력 숨기기")
+    ("컬럼 제목 입력 숨기기")
     $('#add_list_btn-' + boardId).show();
 
     $('#new_column_title_input-' + boardId).hide();
@@ -642,7 +693,7 @@ function addCard(columnId) {
 //컬럼 추가
 function addColumn(boardId, last_sequence) {
     let title = $('#new_column_title_input-' + boardId).val();
-    let sequence = Number(last_sequence) + 1;
+    let sequence = last_sequence * 2;
 
 
     let data = {
@@ -777,7 +828,7 @@ function showCardDetails(cardId, columnId) {
                 $('#update_card_background_color').val(backgroundColor);
             }
 
-            console.log(comments);
+            (comments);
             $('#card_title').text(title);
             $('#card_desc').attr("readonly", true).val(desc).css("background-color", "darkgray");
             $('#desc_save_btn').hide();
@@ -791,7 +842,7 @@ function showCardDetails(cardId, columnId) {
 
 //카드 설명 입력칸 활성화
 function enableTextArea() {
-    console.log("클릭");
+    ("클릭");
     $('#desc_save_btn').show();
     $('#card_desc').attr("readonly", false).css("background-color", "white");
 }
@@ -824,7 +875,7 @@ function saveCardDescription() {
             showCardDetails(current_cardId, columnId)
         },
         error(error, status, request) {
-            console.log(error);
+            (error);
         }
     });
 
@@ -839,7 +890,7 @@ function showCardInput() {
 
 //카드 제목 update
 function updateCardTitle() {
-    console.log(current_cardInfo);
+    (current_cardInfo);
     let columnId = current_cardInfo['columnId'];
     let title = $('#card_title_input').val()
     let dueDate;
@@ -870,7 +921,7 @@ function updateCardTitle() {
             showCardDetails(current_cardId, columnId)
         },
         error(error, status, request) {
-            console.log(error);
+            (error);
         }
     });
 }
@@ -879,7 +930,7 @@ function updateCardTitle() {
 function saveDueDate() {
     let columnId = current_cardInfo['columnId'];
     let dueDate = $('#card_due_date_input').val()
-    console.log(dueDate);
+    (dueDate);
 
     data = {
         'title': current_cardInfo['title'],
@@ -900,7 +951,7 @@ function saveDueDate() {
             showCardDetails(current_cardId, columnId)
         },
         error(error, status, request) {
-            console.log(error);
+            (error);
         }
     });
 }
@@ -948,7 +999,7 @@ function updateBackgroundColor(updateColor) {
         success: function (response) {
         },
         error(error, status, request) {
-            console.log(error);
+            (error);
         }
     });
 }
@@ -1032,9 +1083,7 @@ function showEdits(id) {
     $(`#${id}-edit`).hide();
 }
 
-댓글
-삭제
-
+//댓글 삭제
 function delete_Comment(id) {
     let columnId = current_cardInfo['columnId'];
     //삭제 API 호출

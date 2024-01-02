@@ -37,7 +37,7 @@ public class Columns extends Timestamped {
     private String title;
 
     @Column(nullable = false)
-    private Integer sequence;
+    private Double sequence;
 
     @ManyToOne
     @JoinColumn(name = "board_id", nullable = false)
@@ -53,13 +53,13 @@ public class Columns extends Timestamped {
     @JsonIgnore
     private Set<Card> cards = new LinkedHashSet<>();
 
-    private Columns(String title, Integer sequence, Board board) {
+    private Columns(String title, Double sequence, Board board) {
         this.title = title;
         this.sequence = sequence;
         this.board = board;
     }
 
-    public static Columns create(String title, Integer sequence, Board board) {
+    public static Columns create(String title, Double sequence, Board board) {
         return new Columns(title, sequence, board);
     }
 

@@ -83,7 +83,7 @@ class ColumnControllerTest {
 		this.mockUserSetup();
 		Long columnId = 1L;
 
-		ColumnCreateRequest request = new ColumnCreateRequest( "테스트", 1);
+		ColumnCreateRequest request = new ColumnCreateRequest( "테스트", 665330.0);
 		Columns column = getColumn(BOARD_ID, request, columnId);
 
 		given(columnService.createColumn(any(), any(), any())).willReturn(

@@ -18,7 +18,7 @@ public class ColumnCreateRequest {
 	private final String title;
 
 	@NotNull
-	private final Integer sequence;
+	private final Double sequence;
 
 	public Columns toEntity(Board entity) {
 		return Columns.create(title, sequence, entity);
