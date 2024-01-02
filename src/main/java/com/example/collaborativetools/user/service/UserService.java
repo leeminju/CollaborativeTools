@@ -1,9 +1,8 @@
 package com.example.collaborativetools.user.service;
 
-import com.example.collaborativetools.board.entitiy.Board;
 import com.example.collaborativetools.board.repository.BoardRepository;
+import com.example.collaborativetools.comment.repository.CommentRepository;
 import com.example.collaborativetools.global.constant.ErrorCode;
-import com.example.collaborativetools.global.constant.UserRoleEnum;
 import com.example.collaborativetools.global.exception.ApiException;
 import com.example.collaborativetools.global.jwt.JwtUtil;
 import com.example.collaborativetools.global.jwt.UserDetailsImpl;
@@ -16,6 +15,8 @@ import com.example.collaborativetools.user.dto.UserInfoDto;
 import com.example.collaborativetools.user.entitiy.User;
 import com.example.collaborativetools.user.repository.UserRepository;
 import com.example.collaborativetools.userboard.entity.UserBoard;
+import com.example.collaborativetools.userboard.repository.UserBoardRepository;
+import com.example.collaborativetools.usercard.repository.UserCardRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -41,6 +42,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final BoardRepository boardRepository;
+    private final UserBoardRepository userBoardRepository;
+    private final CommentRepository commentRepository;
+    private final UserCardRepository userCardRepository;
 
     private final StringRedisTemplate stringRedisTemplate;
     private final JwtUtil jwtUtil;
@@ -124,7 +128,7 @@ public class UserService {
         String username = claims.getSubject();
         Long expiration = jwtUtil.getExpiration(accessToken);//로그아웃 알아낸다.
 
-        redisDao.setBlackList(accessToken,"logout",expiration);
+        redisDao.setBlackList(accessToken, "logout", expiration);
         String refreshToken = redisDao.getRefreshToken(username);
 
         stringRedisTemplate.delete(username);
@@ -161,6 +165,7 @@ public class UserService {
         findUser.updatePassword(newPassword);
     }
 
+    @Transactional
     public void unregister(Long userId, User loginUser) {
         if (!userId.equals(loginUser.getId())) {
             throw new ApiException(ErrorCode.NOT_LOGIN_USER);
@@ -169,18 +174,19 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new ApiException(ErrorCode.NOT_FOUND_USER)
         );
-        //해당유저가 관리자인 보드를 모두 없애버림
-        List<UserBoard> userBoardList = user.getUserBoardList();
+        List<UserBoard> userBoardList = userBoardRepository.findByUserId(userId);
+        userBoardRepository.deleteAllByUser(user);
         for (UserBoard userBoard : userBoardList) {
-            if (userBoard.getRole().equals(UserRoleEnum.ADMIN)) {
-                Board board = boardRepository.findById(userBoard.getBoard().getId()).orElseThrow(
-                        () -> new ApiException(ErrorCode.NOT_FOUND_BOARD)
-                );
-                boardRepository.delete(board);
+            if(userBoard.getRole().equals("ADMIN")){
+                boardRepository.delete(userBoard.getBoard());
             }
         }
 
+
+        userCardRepository.deleteAllByUser(user);
+        commentRepository.deleteAllByUser(user);
         userRepository.delete(user);
+
     }
 
     public UserInfoDto getUserInfo(User loginUser) {

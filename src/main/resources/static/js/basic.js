@@ -201,7 +201,6 @@ function logout() {
 
     $.ajax({
         type: 'DELETE', url: `/api/users/logout`, success: function (response) {
-            alert(response['msg']);
             CookieRemove();
         }, error(error, status, request) {
             console.log(error);
