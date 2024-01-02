@@ -37,6 +37,7 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
     private final UserBoardRepository userBoardRepository;
+    private final ColumnRepository columnRepository;
 
 
     public CreateBoardDTO.Response createBoard(CreateBoardDTO.Request request, Long userId) {
@@ -119,9 +120,12 @@ public class BoardService {
 
         List<GetDetailResponseBoardDTO> responseBoardDTOList = new ArrayList<>();
 
-        List<Columns> columnsList = board.getColumnsList();
 
-        //해당 보드에 컬럼들 정보 넣기
+
+        List<Long> columnIds = board.getColumnsList().stream().map(Columns::getId).toList();
+        List<Columns> columnsList  = columnRepository.findColumByIdList(columnIds);
+
+//        해당 보드에 컬럼들 정보 넣기
         for (Columns columns : columnsList) {
             List<CardInColumnDTO> cardInColumnDTOList = new ArrayList<>();
 
@@ -134,8 +138,8 @@ public class BoardService {
                 cardInColumnDTOList.add(cardInColumnDTO);
             }
             cardInColumnDTOList.sort((o1, o2) -> o1.sequence()-o2.sequence());
-
             responseBoardDTOList.add(GetDetailResponseBoardDTO.of(columns, cardInColumnDTOList));
+
         }
 
         responseBoardDTOList.sort(((o1, o2) -> o1.sequence() - o2.sequence()));//순서 순으로 정렬
