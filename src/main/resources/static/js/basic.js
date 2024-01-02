@@ -94,9 +94,11 @@ const dragger = {
 function setCardDraggable() {
     if (this.dragulaCard) this.dragulaCard.destroy();
 
-    const options = {};
-    let cardList = Array.from(document.querySelectorAll(".list-group"));
-    (cardList)
+    const options = {
+        invalid: (el, handle) => {
+            return !/^list-group-item/.test(handle.className); // 클릭한 요소(handle)의 클래스가 list로 시작하는지 test()해서 true false 반환
+        },
+    };
     this.dragulaCard = dragger.init(
         Array.from(document.querySelectorAll(".list-group")),
         options
@@ -106,7 +108,7 @@ function setCardDraggable() {
         // 이벤트 리스너 등록(el은 드래그하는 요소, target은 위에서 등록한 리스트)
         const targetCard = {
             id: el.dataset.cardId * 1,
-            columnId: target.parentNode.dataset.columnId * 1,
+            columnId: target.parentNode.parentNode.dataset.columnId * 1,
             sequence: el.dataset.sequence * 1
         }; // api업데이트시 쓰일 객체 생성
 
@@ -136,7 +138,7 @@ function setColumnDraggable() {
     if (this.dragulaColumn) this.dragulaColumn.destroy();
     const options = {
         invalid: (el, handle) => {
-            return /^add_list_btn/.test(handle.id); // 클릭한 요소(handle)의 클래스가 list로 시작하는지 test()해서 true false 반환
+            return /^add_list_btn/.test(handle.id) || /^list-group-item/.test(handle.className) ; // 클릭한 요소(handle)의 클래스가 list로 시작하는지 test()해서 true false 반환
         },
         revertOnSpill: true
     }
@@ -473,8 +475,8 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
                                         </div>`
             $('#column_list').append(html);
 
-            setCardDraggable();
             setColumnDraggable();
+            setCardDraggable();
         }, error(error, status, request) {
             alert(error['msg']);
         }
