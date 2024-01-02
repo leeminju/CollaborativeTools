@@ -143,7 +143,7 @@ public class BoardService {
 
         }
 
-        responseBoardDTOList.sort(((o1, o2) -> o1.sequence() - o2.sequence()));//순서 순으로 정렬
+        responseBoardDTOList.sort(((o1, o2) -> (int)(o1.sequence() - o2.sequence())));//순서 순으로 정렬
 
         return responseBoardDTOList;
     }
