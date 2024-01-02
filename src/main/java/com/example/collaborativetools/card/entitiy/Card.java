@@ -1,14 +1,18 @@
 package com.example.collaborativetools.card.entitiy;
 
+import com.example.collaborativetools.card.dto.CardRequestDto;
+import com.example.collaborativetools.card.dto.CardUpdateRequestDto;
 import com.example.collaborativetools.column.entitiy.Columns;
 import com.example.collaborativetools.comment.entitiy.Comment;
 import com.example.collaborativetools.global.entity.Timestamped;
 import com.example.collaborativetools.usercard.entity.UserCard;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,36 +20,51 @@ import java.util.List;
 
 @Entity
 @Getter
-@Table(name = "cards")
-@EntityListeners(AuditingEntityListener.class)
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor
 public class Card extends Timestamped {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column
     private String title;
 
-    @Column(nullable = false)
-    private String desc;
+    @Column
+    private String description;
 
-    @Column(nullable = false)
-    private String background_color;
+    @Column(name = "background_color")
+    private String backgroundColor;
 
-    private int order;
+    @Column
+    private Integer sequence = 1;
+
+    @Column(name = "due_date")
     private LocalDateTime dueDate;
-    private LocalDateTime createdAt;
-    private LocalDateTime modifiedAt;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "column_id", nullable = false)
+    @JsonIgnore
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Columns column;
 
-    @OneToMany(mappedBy = "comment")
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("createdAt DESC")
+    @JsonIgnore
     private List<Comment> comments;
 
-    @OneToMany(mappedBy = "usercard")
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<UserCard> userCardList;
+
+    public Card(CardRequestDto cardRequestDto) {
+        this.title = cardRequestDto.getTitle();
+    }
+
+    public void update(CardUpdateRequestDto cardUpdateRequestDto) {
+        this.title = cardUpdateRequestDto.getTitle();
+        this.description = cardUpdateRequestDto.getDescription();
+        this.backgroundColor = cardUpdateRequestDto.getBackgroundColor();
+        this.dueDate = cardUpdateRequestDto.getDueDate();
+    }
 }

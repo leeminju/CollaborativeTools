@@ -2,22 +2,21 @@ package com.example.collaborativetools.board.entitiy;
 
 import com.example.collaborativetools.column.entitiy.Columns;
 import com.example.collaborativetools.global.entity.Timestamped;
-import com.example.collaborativetools.user.entitiy.User;
 import com.example.collaborativetools.userboard.entity.UserBoard;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Getter
 @Entity
-@Builder
 @Table(name = "boards")
+@Builder
 public class Board extends Timestamped {
 
     @Id
@@ -28,18 +27,23 @@ public class Board extends Timestamped {
     private String title;
 
     @Column(nullable = false)
-    private String desc;
+    private String description;
 
-    @Column(nullable = false)
+    @Column(name = "background_color")
     private String backgroundColor;
 
-    @OneToMany(mappedBy = "board")
-    private List<UserBoard> userBoardList= new ArrayList<>();
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<UserBoard> userBoardList = new ArrayList<>();
 
 
-    @OneToMany(mappedBy = "board")
-    private List<Columns> columnsSet= new ArrayList<>();
+    @OneToMany(mappedBy = "board",cascade = CascadeType.REMOVE)
+    private List<Columns> columnsList = new ArrayList<>();
 
-
+    public void updateBoard(String title, String description, String backgroundColor) {
+        this.title = title;
+        this.description = description;
+        this.backgroundColor = backgroundColor;
+    }
 
 }

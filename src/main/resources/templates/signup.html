@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"
+            integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <title>회원가입 페이지</title>
+    <script>
+        function signup() {
+            let username = $('#username').val();
+            let password = $('#password').val();
+            let confirmPassword = $('#confirmPassword').val();
+
+            let data = {
+                'username': username,
+                'password': password,
+                'confirmPassword': confirmPassword,
+            };
+
+            $.ajax({
+                    type: 'POST',
+                    url: '/api/users/signup',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function (response) {
+                        console.log(response);
+                        alert(response['msg']);
+                        window.location.href = '/login';
+                    },
+                    error(error, status, request) {
+                        if (error['responseJSON']['data'] != null) {
+                            let valid = error['responseJSON']['data'];
+                            let str = "";
+
+                            if (valid['password']) {
+                                str += valid['password'] +"\n";
+                            }
+
+                            if (valid['username']) {
+                                str += valid['username'] +"\n";
+                            }
+                            alert(str);
+                        } else {
+                            alert(error['responseJSON']['msg']);
+                        }
+                    }
+                }
+            );
+        }
+    </script>
+</head>
+<body>
+<div id="login-form">
+    <div id="login-title">Sign UP</div>
+
+
+    <div class="login-id-label">username</div>
+    <input type="text" id="username" placeholder="username" class="login-input-box">
+
+    <div class="login-id-label">Password</div>
+    <input type="password" id="password" placeholder="Password" class="login-input-box">
+
+    <div class="login-id-label">Confirm Password</div>
+    <input type="password" id="confirmPassword" placeholder="Confirm Password" class="login-input-box">
+
+    <button onclick="signup()" id="login-id-submit">회원 가입</button>
+
+</div>
+</body>
+</html>
