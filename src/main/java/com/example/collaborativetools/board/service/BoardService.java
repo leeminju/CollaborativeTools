@@ -139,8 +139,8 @@ public class BoardService {
                 cardInColumnDTOList.add(cardInColumnDTO);
             }
             cardInColumnDTOList.sort((o1, o2) -> o1.sequence()-o2.sequence());
-
             responseBoardDTOList.add(GetDetailResponseBoardDTO.of(columns, cardInColumnDTOList));
+
         }
 
         responseBoardDTOList.sort(((o1, o2) -> o1.sequence() - o2.sequence()));//순서 순으로 정렬
