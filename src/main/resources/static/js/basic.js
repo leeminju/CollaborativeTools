@@ -171,7 +171,7 @@ function setColumnDraggable() {
         // 자리가 맨 아래일 경우
         else if (prev && !next) targetColumn.sequence = prev.dataset.sequence * 2;
 
-        if (isNaN(target.sequence)) {
+        if (isNaN(targetColumn.sequence)) {
             win_reload()
         } else {
             this.updateColumnSequence(targetColumn);
@@ -203,10 +203,12 @@ function updateColumnSequence(column) {
         data: JSON.stringify(column),
         success: function (response) {
             alert(response['msg']);
+            console.log(response);
             win_reload();
         },
         error(error, status, request) {
-            alert(column)
+            console.log(error);
+            //alert(column)
         }
     });
 }
@@ -415,6 +417,7 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
                 let sequence = column['sequence'];
                 let cards = column['cardTitleList'];
                 last_sequence = column['sequence'];
+
 
                 let html = `<div id="cards" class="card text-dark bg-light mb-3" style="height:fit-content; max-width:18rem; width: 18rem; margin: 10px" xmlns="http://www.w3.org/1999/html" data-column-id="${columnId}" data-sequence="${sequence}" data-title="${title}">
                                         <div class="card-header">
@@ -694,8 +697,9 @@ function addCard(columnId) {
 //컬럼 추가
 function addColumn(boardId, last_sequence) {
     let title = $('#new_column_title_input-' + boardId).val();
-    let sequence = last_sequence * 2;
-
+    console.log(last_sequence);
+    let sequence = (Number(last_sequence) === 0.0)? 65535 : last_sequence * 2;
+    console.log(sequence);
 
     let data = {
         'title': title, 'sequence': sequence
