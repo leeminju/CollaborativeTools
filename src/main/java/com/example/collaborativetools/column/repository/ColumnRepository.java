@@ -11,4 +11,6 @@ public interface ColumnRepository extends JpaRepository<Columns, Long> {
   @Query("SELECT c FROM Columns As c LEFT JOIN FETCH c.cards WHERE c.id IN :columnList")
   List<Columns> findColumByIdList(@Param("columnList") List<Long> columnList);
 
+  List<Columns> findAllByOrderBySequenceAsc();
+
 }

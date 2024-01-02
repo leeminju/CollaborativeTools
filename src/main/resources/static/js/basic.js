@@ -134,15 +134,16 @@ function setCardDraggable() {
     });
 }
 
+
 function setColumnDraggable() {
     if (this.dragulaColumn) this.dragulaColumn.destroy();
     const options = {
         invalid: (el, handle) => {
-            return /^add_list_btn/.test(handle.id) || /^list-group-item/.test(handle.className) ; // 클릭한 요소(handle)의 클래스가 list로 시작하는지 test()해서 true false 반환
+            return /^add_list_btn/.test(handle.id) || /^list-group-item/.test(handle.className); // 클릭한 요소(handle)의 클래스가 list로 시작하는지 test()해서 true false 반환
         },
         revertOnSpill: true
     }
-    
+
     this.dragulaColumn = dragger.init(
         Array.from(document.querySelectorAll(".colum_list")),
         options
@@ -162,20 +163,18 @@ function setColumnDraggable() {
             items: target.querySelectorAll(".card"),
             type: "column"
         });
-
         // 자리가 맨 위일 경우
         if (!prev && next) targetColumn.sequence = next.dataset.sequence / 2;
         // 자리가 사이일 경우
-        else if (prev && next)
-            targetColumn.sequence =( prev.dataset.sequence * 1) + next.dataset.sequence / 2;
+        else if (prev && next.dataset.sequence !== undefined)
+            targetColumn.sequence = (prev.dataset.sequence * 1) + next.dataset.sequence / 2;
         // 자리가 맨 아래일 경우
-        else if (prev && !next) targetColumn.sequence = prev.dataset.sequence * 2;
+        else if (prev && next.dataset.sequence === undefined) targetColumn.sequence = prev.dataset.sequence * 2;
 
-        if (isNaN(target.sequence)) {
-            win_reload()
-        } else {
-            this.updateColumnSequence(targetColumn);
-        }
+        //컬럼 수정 요청
+        this.updateColumnSequence(targetColumn);
+
+
     });
 }
 
@@ -187,6 +186,7 @@ function updateCardSequence(card) {
         data: JSON.stringify(card),
         success: function (response) {
             alert(response['msg']);
+
             win_reload();
         },
         error(error, status, request) {
@@ -196,19 +196,37 @@ function updateCardSequence(card) {
 }
 
 function updateColumnSequence(column) {
-    $.ajax({
-        type: 'PUT',
-        url: `/api/boards/${current_boardId}/columns/${column.id}`,
-        contentType: 'application/json',
-        data: JSON.stringify(column),
-        success: function (response) {
-            alert(response['msg']);
-            win_reload();
-        },
-        error(error, status, request) {
-            alert(column)
+    new Promise((succ, fail) => {
+        $.ajax({
+            type: 'PUT',
+            url: `/api/boards/${current_boardId}/columns/${column.id}`,
+            contentType: 'application/json',
+            data: JSON.stringify(column),
+            success: function (response) {
+                alert(response['msg']);
+                succ(column)
+                win_reload();
+            },
+            error(error, status, request) {
+                alert(column)
+            }
+        });
+    }).then((arg) => {
+        if (arg.sequence < 0.9) {
+            $.ajax({
+                type: 'PUT',
+                url: `/api/boards/${current_boardId}/columns/sequence`,
+                success: function (response) {
+                    alert(response['msg']);
+                    win_reload();
+                },
+                error(error, status, request) {
+                }
+            });
         }
-    });
+    })
+
+
 }
 
 
@@ -695,7 +713,8 @@ function addCard(columnId) {
 //컬럼 추가
 function addColumn(boardId, last_sequence) {
     let title = $('#new_column_title_input-' + boardId).val();
-    let sequence = last_sequence * 2;
+
+    let sequence = last_sequence === 0 ? 65535 : last_sequence * 2;
 
 
     let data = {
