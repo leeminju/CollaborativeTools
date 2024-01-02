@@ -173,8 +173,6 @@ function setColumnDraggable() {
 
         //컬럼 수정 요청
         this.updateColumnSequence(targetColumn);
-
-
     });
 }
 
@@ -225,8 +223,6 @@ function updateColumnSequence(column) {
             });
         }
     })
-
-
 }
 
 
@@ -271,7 +267,6 @@ function logout() {
 
     $.ajax({
         type: 'DELETE', url: `/api/users/logout`, success: function (response) {
-            alert(response['msg']);
             CookieRemove();
         }, error(error, status, request) {
             (error);
@@ -434,6 +429,7 @@ function showBoardDetails(boardId, title, desc, backgroundColor) {
                 let sequence = column['sequence'];
                 let cards = column['cardTitleList'];
                 last_sequence = column['sequence'];
+
 
                 let html = `<div id="cards" class="card text-dark bg-light mb-3" style="height:fit-content; max-width:18rem; width: 18rem; margin: 10px" xmlns="http://www.w3.org/1999/html" data-column-id="${columnId}" data-sequence="${sequence}" data-title="${title}">
                                         <div class="card-header">
@@ -713,9 +709,7 @@ function addCard(columnId) {
 //컬럼 추가
 function addColumn(boardId, last_sequence) {
     let title = $('#new_column_title_input-' + boardId).val();
-
     let sequence = last_sequence === 0 ? 65535 : last_sequence * 2;
-
 
     let data = {
         'title': title, 'sequence': sequence
@@ -950,8 +944,7 @@ function updateCardTitle() {
 //카드 마감일 지정
 function saveDueDate() {
     let columnId = current_cardInfo['columnId'];
-    let dueDate = $('#card_due_date_input').val()
-    (dueDate);
+    let dueDate = $('#card_due_date_input').val();
 
     data = {
         'title': current_cardInfo['title'],
@@ -1055,8 +1048,6 @@ function removeCardMember(userId) {
     $.ajax({
         type: 'DELETE',
         url: `/api/boards/${current_boardId}/columns/${columnId}/cards/${current_cardId}/cardmember/${userId}`,
-        contentType: 'application/json',
-        data: JSON.stringify(data),
         success: function (response) {
             alert(response['msg']);
             showCardDetails(current_cardId, columnId)

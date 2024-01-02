@@ -11,6 +11,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,9 +45,10 @@ public class Card extends Timestamped {
     @ManyToOne
     @JoinColumn(name = "column_id", nullable = false)
     @JsonIgnore
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Columns column;
 
-    @OneToMany(mappedBy = "card",cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("createdAt DESC")
     @JsonIgnore
     private List<Comment> comments;

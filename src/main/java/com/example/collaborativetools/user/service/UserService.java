@@ -2,6 +2,8 @@ package com.example.collaborativetools.user.service;
 
 import com.example.collaborativetools.board.entitiy.Board;
 import com.example.collaborativetools.board.repository.BoardRepository;
+import com.example.collaborativetools.board.service.BoardService;
+import com.example.collaborativetools.comment.repository.CommentRepository;
 import com.example.collaborativetools.global.constant.ErrorCode;
 import com.example.collaborativetools.global.constant.UserRoleEnum;
 import com.example.collaborativetools.global.exception.ApiException;
@@ -16,10 +18,13 @@ import com.example.collaborativetools.user.dto.UserInfoDto;
 import com.example.collaborativetools.user.entitiy.User;
 import com.example.collaborativetools.user.repository.UserRepository;
 import com.example.collaborativetools.userboard.entity.UserBoard;
+import com.example.collaborativetools.userboard.repository.UserBoardRepository;
+import com.example.collaborativetools.usercard.repository.UserCardRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,17 +39,23 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.example.collaborativetools.global.constant.ErrorCode.INVALID_TOKEN;
+import static com.example.collaborativetools.global.constant.ErrorCode.NOT_FOUND_BOARD;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final BoardRepository boardRepository;
+    private final UserBoardRepository userBoardRepository;
+    private final CommentRepository commentRepository;
+    private final UserCardRepository userCardRepository;
 
     private final StringRedisTemplate stringRedisTemplate;
     private final JwtUtil jwtUtil;
     private final RedisDao redisDao;
+    private final BoardService boardService;
 
     public UserInfoDto signup(SignupRequestDto requestDto) {
         String username = requestDto.getUsername();
@@ -124,7 +135,7 @@ public class UserService {
         String username = claims.getSubject();
         Long expiration = jwtUtil.getExpiration(accessToken);//로그아웃 알아낸다.
 
-        redisDao.setBlackList(accessToken,"logout",expiration);
+        redisDao.setBlackList(accessToken, "logout", expiration);
         String refreshToken = redisDao.getRefreshToken(username);
 
         stringRedisTemplate.delete(username);
@@ -161,6 +172,7 @@ public class UserService {
         findUser.updatePassword(newPassword);
     }
 
+    @Transactional
     public void unregister(Long userId, User loginUser) {
         if (!userId.equals(loginUser.getId())) {
             throw new ApiException(ErrorCode.NOT_LOGIN_USER);
@@ -169,18 +181,20 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new ApiException(ErrorCode.NOT_FOUND_USER)
         );
-        //해당유저가 관리자인 보드를 모두 없애버림
-        List<UserBoard> userBoardList = user.getUserBoardList();
+        List<UserBoard> userBoardList = userBoardRepository.findByUserId(userId);
+
         for (UserBoard userBoard : userBoardList) {
-            if (userBoard.getRole().equals(UserRoleEnum.ADMIN)) {
-                Board board = boardRepository.findById(userBoard.getBoard().getId()).orElseThrow(
-                        () -> new ApiException(ErrorCode.NOT_FOUND_BOARD)
-                );
-                boardRepository.delete(board);
+            //로그인한 유저가 어드민인 보드삭제(해당 보드안에 userBoard,컬럼,카드,댓글 모두 삭제됨)
+            if (userBoard.getRole().compareTo(UserRoleEnum.ADMIN) == 0) {
+                boardService.deleteBoard(userBoard.getBoard().getId(), user.getId());
             }
         }
 
-        userRepository.delete(user);
+
+        userCardRepository.deleteAllByUser(user);//user가 멤버인 userCard 모두 삭제(카드의 멤버에서 삭제됨)
+        commentRepository.deleteAllByUser(user);//user가  남긴 댓글들 삭제
+        userRepository.delete(user);//user삭제
+
     }
 
     public UserInfoDto getUserInfo(User loginUser) {
