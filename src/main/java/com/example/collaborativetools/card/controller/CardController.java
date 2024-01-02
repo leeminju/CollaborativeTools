@@ -51,4 +51,10 @@ public class CardController {
         BaseResponse<Card> response = cardService.joinToCardMember(boardId, columnId, cardId, inviteDto, userDetails.getUser());
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{cardId}/cardmember/{userId}")
+    public ResponseEntity<BaseResponse<String>> deleteCardMember(@PathVariable Long boardId, @PathVariable Long columnId, @PathVariable Long cardId, @PathVariable Long userId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        BaseResponse<String> response = cardService.deleteCardMember(boardId, columnId, cardId, userId,userDetails.getUser());
+        return ResponseEntity.ok(response);
+    }
 }

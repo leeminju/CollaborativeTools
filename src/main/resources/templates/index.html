@@ -191,7 +191,29 @@
             </div>
 
             <div class="modal-body">
+
                 <div>
+                    <h4>카드 멤버</h4>
+                    <div>
+                        <input type="text" class="form-control" id="card_member_name" placeholder="추가할 멤버"
+                               style="width: 86%;display: inline-block;">
+                        <button class="btn btn-outline-dark" onclick="addCardMember()">추가</button>
+                    </div>
+
+                    <button type="button" class="btn dropdown-toggle"
+                            style="background-color: transparent;border:transparent;"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        멤버 목록
+                    </button>
+                    <ul class="dropdown-menu" id="card_member_list">
+                        <li class="dropdown-item" style="width: 200px">예시
+                            <button style="float: right" class="btn btn-outline-dark">삭제</button>
+                        </li>
+                    </ul>
+
+                </div>
+
+                <div style="margin-top: 30px;">
                     <h4>Description</h4>
                     <textarea readonly style="background-color: darkgray" type="text" class="form-control"
                               id="card_desc"
@@ -203,7 +225,7 @@
                     </button>
                 </div>
 
-                <div>
+                <div style="margin-top: 30px">
                     <h4>마감일</h4>
                     <div id="card_due_date"></div>
                     <div style="display: inline-block">
@@ -213,10 +235,12 @@
                         </button>
                     </div>
                 </div>
-                <div>
+
+                <div style="margin-top: 30px">
                     <h4>댓글</h4>
                 </div>
-                <div style="margin-top:20px;">
+
+                <div style="margin-top:30px;">
                     <h4>배경색 설정:</h4>
                     <input type="color" value="#FFFFFF" id="update_card_background_color">
                 </div>

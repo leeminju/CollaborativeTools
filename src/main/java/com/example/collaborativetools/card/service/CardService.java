@@ -1,19 +1,13 @@
 package com.example.collaborativetools.card.service;
 
-import java.util.List;
-import java.util.Optional;
-
-import com.example.collaborativetools.card.dto.*;
-import com.example.collaborativetools.column.repository.ColumnRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-
 import com.example.collaborativetools.board.entitiy.Board;
 import com.example.collaborativetools.board.repository.BoardRepository;
 import com.example.collaborativetools.board.service.BoardService;
+import com.example.collaborativetools.card.dto.*;
 import com.example.collaborativetools.card.entitiy.Card;
 import com.example.collaborativetools.card.repository.CardRepository;
 import com.example.collaborativetools.column.entitiy.Columns;
+import com.example.collaborativetools.column.repository.ColumnRepository;
 import com.example.collaborativetools.global.constant.ErrorCode;
 import com.example.collaborativetools.global.constant.ResponseCode;
 import com.example.collaborativetools.global.dto.BaseResponse;
@@ -24,9 +18,16 @@ import com.example.collaborativetools.userboard.entity.UserBoard;
 import com.example.collaborativetools.userboard.repository.UserBoardRepository;
 import com.example.collaborativetools.usercard.entity.UserCard;
 import com.example.collaborativetools.usercard.repository.UserCardRepository;
-
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+import static com.example.collaborativetools.global.constant.ErrorCode.NOT_CARD_MEMBER;
+import static com.example.collaborativetools.global.constant.ErrorCode.NO_BOARD_AUTHORITY_EXCEPTION;
 
 @Service
 @RequiredArgsConstructor
@@ -63,8 +64,8 @@ public class CardService {
     }
 
     public BaseResponse<Card> joinToCardMember(Long boardId, Long columnId, Long cardId, InviteDto inviteDto, User user) {
-        User userToInvite = userRepository.findByUsername(inviteDto.getUsername()).orElseThrow(() -> new NullPointerException("존재하지 않는 유저입니다"));
-        Card card = cardRepository.findById(cardId).orElseThrow(() -> new NullPointerException("존재하지 않는 카드입니다"));
+        User userToInvite = userRepository.findByUsername(inviteDto.getUsername()).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_USER));
+        Card card = cardRepository.findById(cardId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_CARD));
         Board boards = checkBoard(boardId);
         checkColumn(columnId);
         //보드 유저 확인
@@ -216,16 +217,31 @@ public class CardService {
     private void validateUserInvitation(Long boardId, Long userId) {
         boolean isUserInvited = boardService.isUserInvited(boardId, userId);
         if (!isUserInvited) {
-            throw new SecurityException("보드에 초대되지 않은 사용자는 카드에 접근할 수 없습니다.");
+            throw new ApiException(NO_BOARD_AUTHORITY_EXCEPTION);
         }
     }
 
     private Board checkBoard(Long boardId) {
-        return boardRepository.findById(boardId).orElseThrow(() -> new NullPointerException("존재하지 않는 보드입니다"));
+        return boardRepository.findById(boardId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_BOARD));
     }
 
     private Columns checkColumn(Long columnId) {
-        return columnsRepository.findById(columnId).orElseThrow(() -> new NullPointerException("존재하지 않는 컬럼입니다"));
+        return columnsRepository.findById(columnId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_COLUMN));
     }
 
+    public BaseResponse<String> deleteCardMember(Long boardId, Long columnId, Long cardId, Long userId, User user) {
+        User removeUser = userRepository.findById(userId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_USER));
+        Card card = cardRepository.findById(cardId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_CARD));
+        Board boards = checkBoard(boardId);
+        checkColumn(columnId);
+        //보드 유저 확인
+        validateUserInvitation(boards.getId(), user.getId());
+
+        UserCard userCard = userCardRepository.findByCardAndUser(card, removeUser).orElseThrow(
+                () -> new ApiException(NOT_CARD_MEMBER));
+
+        userCardRepository.delete(userCard);
+
+        return BaseResponse.of(ResponseCode.DELETED_CARD_MEMBER, null);
+    }
 }
