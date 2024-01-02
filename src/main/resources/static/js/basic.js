@@ -21,7 +21,7 @@ $('html').click(function (e) {
     let targetId = e.target.id;
     if (prev_columnId !== -1) {
         if (targetId !== `colum_title-${prev_columnId}` && targetId !== `column_title_input-${prev_columnId}`) {
-            updateColumn(prev_columnId);
+            updateColumnTitle(prev_columnId);
         }
     }
 
@@ -32,17 +32,15 @@ $('html').click(function (e) {
     }
 });
 
-function updateColumn(prev_columnId) {
+function updateColumnTitle(prev_columnId) {
     let title = $(`#column_title_input-${prev_columnId}`).val();
     let data = {
-        'boardId': current_boardId,
         'title': title,
         'sequence': prev_sequence
-
     }
     $.ajax({
         type: 'PUT',
-        url: `/api/columns/${prev_columnId}`,
+        url: `/api/boards/${current_boardId}/columns/${prev_columnId}`,
         contentType: 'application/json',
         data: JSON.stringify(data),
         success: function (response) {
@@ -325,9 +323,7 @@ function removeBoard(boardId) {
 
 function showEditTitle(columnId, sequence) {
     if (prev_columnId !== -1 && prev_columnId !== columnId) {
-        // $('#colum_title-' + prev_columnId).show();
-        // $('#column_title_input-' + prev_columnId).hide();
-        updateColumn(prev_columnId);
+        updateColumnTitle(prev_columnId);
     }
 
     $('#colum_title-' + columnId).hide();
@@ -638,12 +634,12 @@ function addColumn(boardId, last_sequence) {
 
 
     let data = {
-        'boardId': boardId, 'title': title, 'sequence': sequence
+        'title': title, 'sequence': sequence
     };
 
     $.ajax({
         type: 'POST',
-        url: `/api/columns`,
+        url: `/api/boards/${boardId}/columns`,
         contentType: 'application/json',
         data: JSON.stringify(data),
         success: function (response) {
@@ -669,7 +665,7 @@ function addColumn(boardId, last_sequence) {
 
 function removeColumn(columnId) {
     $.ajax({
-        type: 'DELETE', url: `/api/columns/${columnId}`,
+        type: 'DELETE', url: `/api/boards/${current_boardId}/columns/${columnId}`,
         success: function (response) {
             alert(response['msg']);
             win_reload();
