@@ -25,6 +25,7 @@ public enum ErrorCode {
     /* 404 NOT_FOUND : Resource 권한이 없음 */
     NOT_FOUND_USER_EXCEPTION(404, "해당 유저는 없습니다."),
     NOT_FOUND_BOARD_EXCEPTION(404, "해당 보드는 없습니다."),
+    NOT_CARD_MEMBER(404, "카드 멤버가 아닙니다."),
     NOT_FOUND_USER_BOARD_EXCEPTION(404, "해당 유저에 관한 보드는 없습니다."),
 
     /* 404 NOT_FOUND : Resource 를 찾을 수 없음 */
