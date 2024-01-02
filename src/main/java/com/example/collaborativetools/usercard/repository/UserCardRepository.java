@@ -11,4 +11,6 @@ public interface UserCardRepository extends JpaRepository<UserCard, Long> {
     boolean existsByCardAndUser(Card card, User user);
 
     Optional<UserCard> findByCardAndUser(Card card, User user);
+
+    void deleteAllByUser(User user);
 }
