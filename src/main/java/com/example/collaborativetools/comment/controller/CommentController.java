@@ -24,19 +24,22 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/comments")
+@RequestMapping("/api/boards/{boardId}/columns/{columnId}/cards/{cardId}/comments")
 @RestController
-public class CommentApiController {
+public class CommentController {
 
 	private final CommentService commentService;
 
 	@PostMapping
 	public ResponseEntity<BaseResponse<CommentResponse>> createComment(
+		@PathVariable Long boardId,
+		@PathVariable Long columnId,
+		@PathVariable Long cardId,
 		@Valid @RequestBody CommentCreateRequest request,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 	) {
 		User user = userDetails.getUser();
-		CommentResponse response = commentService.createComment(request, user);
+		CommentResponse response = commentService.createComment(boardId, columnId, cardId, request, user);
 
 		return ResponseEntity.status(CREATED_COMMENT.getHttpStatus())
 			.body(
@@ -49,12 +52,15 @@ public class CommentApiController {
 
 	@PutMapping("/{commentId}")
 	public ResponseEntity<BaseResponse<CommentResponse>> updateComment(
+		@PathVariable Long boardId,
+		@PathVariable Long columnId,
+		@PathVariable Long cardId,
 		@PathVariable Long commentId,
 		@Valid @RequestBody CommentUpdateRequest request,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 	) {
 		User user = userDetails.getUser();
-		CommentResponse response = commentService.updateComment(commentId, request, user);
+		CommentResponse response = commentService.updateComment(boardId, columnId, cardId, commentId, request, user);
 
 		return ResponseEntity.status(UPDATED_COMMENT.getHttpStatus())
 			.body(
@@ -67,11 +73,14 @@ public class CommentApiController {
 
 	@DeleteMapping("/{commentId}")
 	public ResponseEntity<BaseResponse<Void>> deleteComment(
+		@PathVariable Long boardId,
+		@PathVariable Long columnId,
+		@PathVariable Long cardId,
 		@PathVariable Long commentId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 	) {
 		User user = userDetails.getUser();
-		commentService.deleteComment(commentId, user);
+		commentService.deleteComment(boardId, columnId, cardId, commentId, user);
 
 		return ResponseEntity.status(DELETED_COMMENT.getHttpStatus())
 			.body(

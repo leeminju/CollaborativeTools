@@ -13,7 +13,7 @@ import com.example.collaborativetools.board.service.BoardService;
 import com.example.collaborativetools.card.entitiy.Card;
 import com.example.collaborativetools.card.repository.CardRepository;
 import com.example.collaborativetools.column.entitiy.Columns;
-import com.example.collaborativetools.column.repository.ColumnsRepository;
+import com.example.collaborativetools.column.repository.ColumnRepository;
 import com.example.collaborativetools.global.constant.ErrorCode;
 import com.example.collaborativetools.global.constant.ResponseCode;
 import com.example.collaborativetools.global.dto.BaseResponse;
@@ -31,7 +31,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class CardService {
-
     private final CardRepository cardRepository;
     private final UserCardRepository userCardRepository;
     private final ColumnsRepository columnsRepository;

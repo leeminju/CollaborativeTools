@@ -31,8 +31,7 @@ public class ColumnService {
 
 	@Transactional
 	public ColumnResponse createColumn(Long boardId, ColumnCreateRequest request, User loginUser) {
-		Board board = boardRepository.findById(boardId)
-			.orElseThrow(() -> new ApiException(NOT_FOUND_BOARD));
+		Board board = findBoard(boardId);
 
 		checkUserPermission(board.getId(), loginUser.getId());
 
@@ -41,10 +40,11 @@ public class ColumnService {
 		return ColumnResponse.from(column);
 	}
 
+
+
 	@Transactional
 	public ColumnResponse updateColumn(Long boardId, Long columnId, ColumnUpdateRequest request, User loginUser) {
-		Board board = boardRepository.findById(boardId)
-			.orElseThrow(() -> new ApiException(NOT_FOUND_BOARD));
+		Board board = findBoard(boardId);
 
 		checkUserPermission(board.getId(), loginUser.getId());
 
@@ -65,6 +65,12 @@ public class ColumnService {
 			.stream()
 			.map(ColumnResponse::from)
 			.toList();
+	}
+
+
+	public Board findBoard(Long boardId) {
+		return boardRepository.findById(boardId)
+			.orElseThrow(() -> new ApiException(NOT_FOUND_BOARD));
 	}
 
 	public Columns findColumn(Long columnId) {
