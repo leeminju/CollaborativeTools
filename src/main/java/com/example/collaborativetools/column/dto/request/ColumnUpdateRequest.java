@@ -12,9 +12,6 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class ColumnUpdateRequest {
-	@NotNull(message = "필수로 입력")
-	private final Long boardId;
-
 	@NotBlank(message = "제목을 입력해주세요")
 	@Size(max = 500, message = "500자 이하로 입력")
 	private final String title;
