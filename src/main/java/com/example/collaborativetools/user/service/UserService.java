@@ -1,8 +1,11 @@
 package com.example.collaborativetools.user.service;
 
+import com.example.collaborativetools.board.entitiy.Board;
 import com.example.collaborativetools.board.repository.BoardRepository;
+import com.example.collaborativetools.board.service.BoardService;
 import com.example.collaborativetools.comment.repository.CommentRepository;
 import com.example.collaborativetools.global.constant.ErrorCode;
+import com.example.collaborativetools.global.constant.UserRoleEnum;
 import com.example.collaborativetools.global.exception.ApiException;
 import com.example.collaborativetools.global.jwt.JwtUtil;
 import com.example.collaborativetools.global.jwt.UserDetailsImpl;
@@ -21,6 +24,7 @@ import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,7 +39,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.example.collaborativetools.global.constant.ErrorCode.INVALID_TOKEN;
+import static com.example.collaborativetools.global.constant.ErrorCode.NOT_FOUND_BOARD;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -49,6 +55,7 @@ public class UserService {
     private final StringRedisTemplate stringRedisTemplate;
     private final JwtUtil jwtUtil;
     private final RedisDao redisDao;
+    private final BoardService boardService;
 
     public UserInfoDto signup(SignupRequestDto requestDto) {
         String username = requestDto.getUsername();
@@ -175,17 +182,18 @@ public class UserService {
                 () -> new ApiException(ErrorCode.NOT_FOUND_USER)
         );
         List<UserBoard> userBoardList = userBoardRepository.findByUserId(userId);
-        userBoardRepository.deleteAllByUser(user);
+
         for (UserBoard userBoard : userBoardList) {
-            if(userBoard.getRole().equals("ADMIN")){
-                boardRepository.delete(userBoard.getBoard());
+            //로그인한 유저가 어드민인 보드삭제(해당 보드안에 userBoard,컬럼,카드,댓글 모두 삭제됨)
+            if (userBoard.getRole().compareTo(UserRoleEnum.ADMIN) == 0) {
+                boardService.deleteBoard(userBoard.getBoard().getId(), user.getId());
             }
         }
 
 
-        userCardRepository.deleteAllByUser(user);
-        commentRepository.deleteAllByUser(user);
-        userRepository.delete(user);
+        userCardRepository.deleteAllByUser(user);//user가 멤버인 userCard 모두 삭제(카드의 멤버에서 삭제됨)
+        commentRepository.deleteAllByUser(user);//user가  남긴 댓글들 삭제
+        userRepository.delete(user);//user삭제
 
     }
 

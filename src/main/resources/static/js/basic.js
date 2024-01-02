@@ -934,8 +934,7 @@ function updateCardTitle() {
 //카드 마감일 지정
 function saveDueDate() {
     let columnId = current_cardInfo['columnId'];
-    let dueDate = $('#card_due_date_input').val()
-    (dueDate);
+    let dueDate = $('#card_due_date_input').val();
 
     data = {
         'title': current_cardInfo['title'],
@@ -1039,8 +1038,6 @@ function removeCardMember(userId) {
     $.ajax({
         type: 'DELETE',
         url: `/api/boards/${current_boardId}/columns/${columnId}/cards/${current_cardId}/cardmember/${userId}`,
-        contentType: 'application/json',
-        data: JSON.stringify(data),
         success: function (response) {
             alert(response['msg']);
             showCardDetails(current_cardId, columnId)
