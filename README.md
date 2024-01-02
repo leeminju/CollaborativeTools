@@ -1,5 +1,3 @@
-<img src ="https://capsule-render.vercel.app/api?type=soft&color=6495ED&height=150&text=COLLABORATION TOOL&fontSize=70&fontColor=ffffff&animation=fadeIn"/>
-
 # 프로젝트 협업 도구 만들기
 
 ---
