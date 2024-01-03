@@ -6,6 +6,12 @@
   - 프로젝트를 진행하다보면 누가, 무엇을, 언제까지 해야하는지 명확히 명시가 되어있으면 보다 효율적으로 프로젝트를 진행할 수 있을 것 입니다.
     그렇기에 협업을 할 때 작업의 배분, 진행 현황 등을 관리하는 협업 툴을 만들어 보았습니다.
 ---
+### 🍄 배포 링크
+http://ec2-13-125-216-237.ap-northeast-2.compute.amazonaws.com
+
+### 🍄 시연영상
+https://www.youtube.com/watch?v=lY9eVqodnAc
+---
 ## 🍄 준비사항
 ### 🍄 Git convention
 - feat : 새로운 기능 추가
