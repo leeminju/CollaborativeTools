@@ -2,6 +2,8 @@ package com.example.collaborativetools.column.service;
 
 import static com.example.collaborativetools.global.constant.ErrorCode.*;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Service
 public class ColumnService {
+	private static final Double DEFAULT_SEQUENCE = 16384.0;
 	private final BoardRepository boardRepository;
 	private final ColumnRepository columnRepository;
 	private final UserBoardRepository userBoardRepository;
@@ -67,6 +70,15 @@ public class ColumnService {
 	public void checkUserPermission(Long boardId, Long userId) {
 		if (!userBoardRepository.existsByBoardIdAndUserId(boardId, userId)) {
 			throw new ApiException(NO_BOARD_AUTHORITY_EXCEPTION);
+		}
+	}
+
+	@Transactional
+	public void reOrderSequence() {
+		List<Columns> columns = columnRepository.findAllByOrderBySequenceAsc();
+		int idx = 1;
+		for (Columns column: columns) {
+			column.setSequence(DEFAULT_SEQUENCE * idx++);
 		}
 	}
 }

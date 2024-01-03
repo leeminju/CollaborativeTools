@@ -170,11 +170,8 @@ function setColumnDraggable() {
             targetColumn.sequence = (prev.dataset.sequence * 1) + next.dataset.sequence / 2;
         // 자리가 맨 아래일 경우
         else if (prev && next.dataset.sequence === undefined) targetColumn.sequence = prev.dataset.sequence * 2;
-
         //컬럼 수정 요청
         this.updateColumnSequence(targetColumn);
-
-
     });
 }
 
@@ -711,12 +708,8 @@ function addCard(columnId) {
 //컬럼 추가
 function addColumn(boardId, last_sequence) {
     let title = $('#new_column_title_input-' + boardId).val();
-    console.log("lastSequence")
-    console.log(last_sequence)
-
     let sequence = last_sequence != 0 ? last_sequence * 2 : 65535;
-
-
+  
     let data = {
         'title': title, 'sequence': sequence
     };
